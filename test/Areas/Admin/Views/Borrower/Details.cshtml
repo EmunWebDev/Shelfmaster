@@ -1,0 +1,166 @@
+﻿@model test.Areas.Admin.Models.BorrowerViewModel
+
+@{
+    ViewData["Title"] = "Borrower's Details";
+    ViewData["Navigation Title"] = "Borrower's Details";
+}
+
+<div class="row mt-5 g-3">
+    <div class="col-12">
+        <div class="card border-0 shadow-sm h-100 overflow-auto">
+            <div class="card-body">
+                <div class="row">
+                    <nav style="--bs-breadcrumb-divider: '>';" aria-label="breadcrumb">
+                        <ol class="breadcrumb text-color4">
+                            <li class="breadcrumb-item">
+                                <a asp-controller="Borrower" asp-action="Index" class="text-color3 fw-bold">
+                                    Borrower
+                                </a>
+                            </li>
+                            <li class="breadcrumb-item active" aria-current="page">
+                                Borrower's Details
+                            </li>
+                        </ol>
+                    </nav>
+
+                    <hr />
+
+                    <!-- Borrower Personal Info -->
+                    <div class="col-12 col-sm-3 col-md-3 col-lg-2">
+                        <span class="fw-bold">Borrower</span>
+                    </div>
+                    <div class="col-12 col-sm-9 col-md-9 col-lg-10">
+                        <div class="row">
+                            <div class="col">
+                                <label>Name</label>
+                                <h5>@Model.Name</h5>
+                            </div>
+                            <div class="col">
+                                <label>Birth Date</label>
+                                <h5>@Model.BirthDate?.ToString("MMMM d, yyyy")</h5>
+                            </div>
+                        </div>
+                        <div class="row mt-3">
+                            <div class="col">
+                                <label>Contact Number</label>
+                                <h5>@Model.ContactNum</h5>
+                            </div>
+                            <div class="col">
+                                <label>Gender</label>
+                                <h5>@Model.Gender</h5>
+                            </div>
+                        </div>
+                        <div class="row mt-3">
+                            <div class="col">
+                                <label>Email</label>
+                                <h5>@Model.Email</h5>
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr />
+
+                    <!-- Borrower Transactions -->
+                    <div class="col-12">
+                        <div class="card border-0 shadow-sm h-100">
+                            <div class="card-body">
+                                <div class="row align-items-center">
+                                    <div class="col-6 col-md-4 mb-3 mb-md-0">
+                                        <select class="form-select" id="sortDropdown">
+                                            <option value="">Sort by Status</option>
+                                            <option value="Borrowed">Borrowed</option>
+                                            <option value="Returned">Returned</option>
+                                            <option value="Overdue">Overdue</option>
+                                            <option value="Lost">Lost</option>
+                                            <option value="Damaged">Damaged</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="table-responsive mt-3 w-100">
+                                    <table class="table table-hover">
+                                        <thead>
+                                            <tr>
+                                                <th>#</th>
+                                                <th>Book</th>
+                                                <th>Copy No.</th>
+                                                <th>Borrowed On</th>
+                                                <th>Due Date</th>
+                                                <th>Return Date</th>
+                                                <th>Status</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach (var transaction in Model.Transactions)
+                                            {
+                                                <tr>
+                                                    <td>@transaction.Id</td>
+                                                    <td>@transaction.BookCopy?.Book?.Title</td>
+                                                    <td>@transaction.BookCopy?.CopyNumber</td>
+                                                    <td>@transaction.TransactionDate.ToString("MMMM dd, yyyy")</td>
+                                                    <td>@transaction.DueDate.ToString("MMMM dd, yyyy")</td>
+                                                    <td>@(transaction.ReturnDate?.ToString("MMMM dd, yyyy") ?? "Not Returned")</td>
+                                                    <td>
+                                                        @if (transaction.BookCopy != null)
+                                                        {
+                                                            if (transaction.BookCopy.Status == "Borrowed")
+                                                            {
+                                                                <span class="badge bg-info">Borrowed</span>
+                                                            }
+                                                            else if (transaction.BookCopy.Status == "Available")
+                                                            {
+                                                                <span class="badge bg-success">Returned</span>
+                                                            }
+                                                            else if (transaction.BookCopy.Status == "Overdue")
+                                                            {
+                                                                <span class="badge bg-warning">Overdue</span>
+                                                            }
+                                                            else if (transaction.BookCopy.Status == "Lost")
+                                                            {
+                                                                <span class="badge bg-secondary">Lost</span>
+                                                            }
+                                                            else if (transaction.BookCopy.Status == "Damaged")
+                                                            {
+                                                                <span class="badge bg-secondary">Damaged</span>
+                                                            }
+                                                        }
+                                                        else
+                                                        {
+                                                            <span class="badge bg-secondary">No Book Copy</span>
+                                                        }
+                                                    </td>
+                                                </tr>
+                                            }
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- End Transactions -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Filtering Script -->
+<script>
+    document.getElementById("sortDropdown").addEventListener("change", function () {
+        let selected = this.value;
+        let rows = document.querySelectorAll("table tbody tr");
+
+        rows.forEach(row => {
+            let statusBadge = row.querySelector("td:last-child span");
+            if (!statusBadge) return;
+
+            let statusText = statusBadge.textContent.trim();
+
+            if (selected === "" || statusText === selected) {
+                row.style.display = "";
+            } else {
+                row.style.display = "none";
+            }
+        });
+    });
+</script>

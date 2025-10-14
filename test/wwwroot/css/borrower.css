@@ -1,0 +1,526 @@
+﻿/* =======================
+   Root Variables
+======================= */
+:root {
+    --color1: #F5F9FF; /* page bg */
+    --color2: #D6E4FF; /* hover highlight */
+    --color3: #4A90E2; /* primary accent (blue) */
+    --color4: #070000; /* deep navy */
+    --card-shadow: 0 10px 20px rgba(28,39,60,.06);
+    --banner-h: 160px;
+    --colorActive: #004a92;
+    --grayDark: #424242;
+    --grayDarker: #2E2E2E;
+    --grayLight: #BDBDBD;
+}
+
+/* =======================
+   Base Styles
+======================= */
+body {
+    background: var(--color1);
+}
+
+body, html {
+    height: 100%;
+}
+
+.main {
+    background: #f7f9fc;
+}
+
+/* =======================
+   Logo
+======================= */
+.bh-logo-sm {
+    height: 60px;
+    width: auto;
+    display: block;
+}
+
+/* =======================
+   Sidebar
+======================= */
+.bh-sidebar {
+    width: 280px;
+    background: #fff;
+    box-shadow: var(--card-shadow);
+    flex-shrink: 0; /* Don’t shrink when content grows */
+    display: flex;
+    flex-direction: column;
+    height: auto;
+    min-height: 100%; /* Always stretch with parent */
+    padding: 1rem .75rem;
+    transition: width 0.3s ease;
+}
+
+/* Sidebar full height alignment */
+.d-flex.flex-grow-1 {
+    align-items: stretch; /* Sidebar and content stretch equally */
+}
+
+/* Sidebar collapsed state */
+.bh-sidebar.collapsed {
+    width: 70px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* Center items horizontally */
+}
+
+    .bh-sidebar.collapsed .sidebar-text,
+    .bh-sidebar.collapsed .sidebar-title {
+        display: none;
+    }
+
+    .bh-sidebar.collapsed .bh-logo-sm {
+        height: 40px;
+        margin: 0 auto;
+    }
+
+    .bh-sidebar.collapsed .bh-menu-link {
+        text-align: center;
+        padding: 0.75rem 0;
+    }
+
+        .bh-sidebar.collapsed .bh-menu-link i {
+            margin: 0 auto;
+            font-size: 1.3rem;
+        }
+
+/* =======================
+   Sidebar Menu
+======================= */
+.bh-menu {
+    border-radius: .75rem;
+    background: #fff;
+    border: 0;
+}
+
+.bh-menu-link {
+    display: block;
+    padding: .6rem .75rem;
+    border-radius: .5rem;
+    color: #243b55;
+    text-decoration: none;
+    margin: .15rem 0;
+    transition: background .15s ease, color .15s ease;
+}
+
+    .bh-menu-link:hover,
+    .bh-menu-link.active {
+        background: var(--color2); /* pale blue highlight */
+        color: var(--color4); /* deep navy text */
+    }
+
+/* =======================
+   Banner
+======================= */
+.bh-banner {
+    height: var(--banner-h);
+    overflow: hidden;
+    border-bottom: 1px solid #eef2f7;
+    box-shadow: 0 2px 8px rgba(0,0,0,.04);
+    background: #f8fafc;
+    width: 100%;
+    display: block;
+}
+
+.bh-banner-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+/* Banner Text Overlay */
+.bh-banner-text {
+    position: absolute;
+    top: 50%;
+    left: 8%;
+    transform: translateY(-50%);
+    color: #fff;
+    z-index: 2;
+    text-align: left;
+}
+
+    .bh-banner-text h2 {
+        font-size: 1.8rem;
+        font-weight: 700;
+        color: #fff;
+    }
+
+        .bh-banner-text h2 .highlight {
+            color: #f5c15a; /* gold/yellow accent */
+        }
+
+    .bh-banner-text p {
+        font-size: 1rem;
+        margin-top: 0.25rem;
+        color: #f8fafc;
+    }
+
+        .bh-banner-text p .highlight-sm {
+            color: #f5c15a;
+            font-weight: 500;
+        }
+
+/* Responsive banner text */
+@media (max-width: 768px) {
+    .bh-banner-text h2 {
+        font-size: 1.3rem;
+    }
+
+    .bh-banner-text p {
+        font-size: 0.9rem;
+    }
+}
+
+/* =======================
+   Footer
+======================= */
+.custom-footer {
+    background: #fff;
+    border-top: 1px solid #edf1f5;
+    width: 100%;
+}
+
+    .custom-footer .footer-icons a {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 38px;
+        height: 38px;
+        margin: 0 .25rem;
+        border-radius: .5rem;
+        background: #fff;
+        border: 1px solid #e6eaf0;
+        color: #4b5563;
+        transition: .15s ease;
+    }
+
+        .custom-footer .footer-icons a:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,.08);
+            color: var(--color3); /* icon turns bright blue */
+            background: var(--color2); /* pale blue background */
+            border-color: var(--color3);
+        }
+
+    .custom-footer .footer-bottom {
+        font-size: .9rem;
+        color: #6b7280;
+        border-top: 1px solid #edf1f5;
+    }
+
+/* =======================
+   Page Title
+======================= */
+.page-title {
+    font-weight: 700;
+    color: var(--color4);
+}
+
+/* =======================
+   Cards / Stats
+======================= */
+.stat-card.match-h {
+    min-height: 120px;
+}
+
+.stat-card .card-body {
+    padding: 1rem 1.25rem;
+}
+
+.chart-box {
+    position: relative;
+    height: 280px;
+}
+
+/* =======================
+   Topbar
+======================= */
+.bh-topbar {
+    padding: 0;
+    margin: 0;
+    border: 0;
+    box-shadow: 0 2px 8px rgba(0,0,0,.04);
+}
+
+/* =======================
+   MyBorrowed Custom
+======================= */
+.borrow-card {
+    border-radius: 1rem;
+    box-shadow: var(--card-shadow);
+    border: 0;
+    transition: transform .15s ease;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+    .borrow-card:hover {
+        transform: translateY(-4px);
+    }
+
+    .borrow-card img {
+        width: 100%;
+        height: 280px; /* Increased for full book image */
+        object-fit: cover;
+    }
+
+    .borrow-card h5 {
+        font-weight: 700;
+    }
+
+    .borrow-card .btn {
+        background: var(--color3);
+        border: none;
+        margin-top: auto; /* Push button to bottom */
+    }
+
+        .borrow-card .btn:hover {
+            background: var(--color4);
+        }
+
+    .borrow-card .card-body {
+        flex: 1; /* stretch to fill equal height */
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-start;
+    }
+
+/* Custom column size */
+.custom-col-5 {
+    flex: 0 0 25%; /* 4 columns instead of 5 */
+    max-width: 25%;
+    display: flex;
+}
+
+/* Responsive adjustments */
+@media (max-width: 1200px) {
+    .custom-col-5 {
+        flex: 0 0 33.33%;
+        max-width: 33.33%;
+    }
+    /* 3 per row */
+}
+
+@media (max-width: 768px) {
+    .custom-col-5 {
+        flex: 0 0 50%;
+        max-width: 50%;
+    }
+    /* 2 per row */
+}
+
+@media (max-width: 576px) {
+    .custom-col-5 {
+        flex: 0 0 100%;
+        max-width: 100%;
+    }
+    /* 1 per row */
+}
+
+/* Row flex wrap + equal height */
+.row.g-4 {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: stretch; /* Equal height across row */
+}
+
+/* =======================
+   Filters
+======================= */
+.filter-section {
+    margin-bottom: 1.5rem;
+}
+
+    .filter-section label {
+        font-weight: 600;
+        margin-right: 10px;
+        color: var(--color4);
+    }
+
+/* =======================
+   Profile
+======================= */
+.profile-section {
+    cursor: pointer;
+}
+
+.profile-img {
+    width: 40px;
+    height: 40px;
+    object-fit: cover;
+    border: 2px solid var(--color3);
+}
+
+.dropdown-toggle::after {
+    margin-left: 0.5rem;
+}
+
+/* =======================
+   Misc
+======================= */
+/* Remove hamburger background */
+#sidebarToggle {
+    background: transparent !important;
+    box-shadow: none !important;
+}
+
+/* =======================
+   Added Responsiveness Fixes
+======================= */
+
+/* Banner responsiveness */
+.bh-banner {
+    height: auto;
+    max-height: 220px;
+}
+
+.bh-banner-img {
+    max-height: 220px;
+    height: auto;
+}
+
+.bh-banner-text {
+    left: 6%;
+}
+
+@media (max-width: 576px) {
+    .bh-banner-text h2 {
+        font-size: 1.1rem;
+    }
+
+    .bh-banner-text p {
+        font-size: 0.8rem;
+    }
+
+    .bh-banner-text {
+        left: 5%;
+        width: 90%;
+    }
+}
+
+/* Footer responsiveness */
+.custom-footer .footer-icons {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.footer-bottom {
+    font-size: 0.85rem;
+}
+
+/* Dashboard adjustments on small screens */
+@media (max-width: 768px) {
+    .borrowers-dashboard {
+        padding: 1rem !important;
+    }
+
+    .profile-section {
+        flex-direction: row;
+        align-items: center;
+        justify-content: flex-end;
+    }
+
+    .page-title {
+        font-size: 1.2rem;
+    }
+}
+
+.action-btn {
+    font-weight: 700;
+    font-size: 1rem;
+    padding: 0.65rem 1.6rem;
+    border-radius: 0.5rem;
+    transition: all 0.25s ease-in-out;
+    border: none;
+    color: #FFFFFF;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.15);
+    min-width: 130px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.btn-icon {
+    font-size: 1.1rem;
+    line-height: 1;
+}
+
+.action-btn:focus {
+    outline: 3px solid #000;
+    outline-offset: 3px;
+}
+
+.btn-login {
+    background-color: var(--color3);
+    color: #FFFFFF;
+    font-size: 1.2rem;
+    padding: 0.9rem 2.5rem;
+    min-width: 220px;
+}
+
+    .btn-login:hover {
+        background-color: #3F7EDB;
+    }
+
+    .btn-login:active,
+    .btn-login.clicked {
+        background-color: var(--colorActive);
+    }
+
+    .btn-login:disabled {
+        background-color: var(--color2);
+        color: #7D7D7D;
+    }
+
+/* =========================
+   📝 Register Button
+========================= */
+.btn-register {
+    background-color: var(--color3);
+    color: #FFFFFF;
+    font-size: 1.2rem;
+    padding: 0.9rem 2.5rem;
+    min-width: 220px;
+}
+
+    .btn-register:hover {
+        background-color: #3F7EDB;
+    }
+
+    .btn-register:active,
+    .btn-register.clicked {
+        background-color: var(--colorActive);
+    }
+
+    .btn-register:disabled {
+        background-color: var(--color2);
+        color: #7D7D7D;
+    }
+
+/* =========================
+   📱 Responsive Adjustments
+========================= */
+@media (max-width: 576px) {
+    .action-btn {
+        display: block;
+        width: 100%;
+        margin-bottom: 0.85rem;
+        font-size: 1.1rem;
+    }
+
+    .btn-login,
+    .btn-register {
+        font-size: 1.25rem;
+        padding: 1rem;
+        min-width: 100%;
+    }
+}

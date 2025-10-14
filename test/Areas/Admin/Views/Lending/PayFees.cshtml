@@ -1,0 +1,141 @@
+﻿@model test.Areas.Admin.Models.PaymentViewModel
+
+@{
+    ViewData["Title"] = "Payment Review";
+    ViewData["Navigation Title"] = "Payment Review";
+}
+
+<div class="row mt-5 g-3">
+    <div class="col-12">
+        <div class="card border-0 shadow-sm h-100 overflow-auto">
+            <form asp-controller="Lending" asp-action="ProcessPayment" asp-area="Admin" method="POST">
+                <div class="card-body">
+                    @await Html.PartialAsync("~/Views/Shared/Partials/_ToastNotification.cshtml")
+
+                    <!-- Breadcrumb Navigation -->
+                    <nav style="--bs-breadcrumb-divider: '>';" aria-label="breadcrumb">
+                        <ol class="breadcrumb text-color4">
+                            <li class="breadcrumb-item">
+                                <a asp-controller="Lending" asp-action="TransactionsIndex" class="text-color3 fw-bold">Transactions</a>
+                            </li>
+                            <li class="breadcrumb-item active" aria-current="page">Payment Review</li>
+                        </ol>
+                    </nav>
+
+                    <hr />
+
+                    <!-- Borrower Details -->
+                    <div class="row mb-3">
+                        <input type="hidden" name="transactionId" value="@Model.TransactionID" />
+                        <div class="col-12 col-md-3">
+                            <h6 class="fw-bold">Borrower Details</h6>
+                        </div>
+                        <div class="col-12 col-md-9">
+                            <div class="row">
+                                <div class="col">
+                                    <label class="form-label fw-semibold">Name</label>
+                                    <h5>@Model.BorrowerName</h5>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr />
+
+                    <!-- Penalty Summary -->
+                    <div class="row mb-3">
+                        <div class="col-12 col-md-3">
+                            <h6 class="fw-bold">Penalty Summary</h6>
+                        </div>
+                        <div class="col-12 col-md-9">
+                            <table class="table table-bordered">
+                                <thead>
+                                    <tr>
+                                        <th>Reason</th>
+                                        <th>Amount</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @if (Model.Penalties != null && Model.Penalties.Any())
+                                    {
+                                        @foreach (var penalty in Model.Penalties)
+                                        {
+                                            <tr>
+                                                <td>@penalty.Reason</td>
+                                                <td>₱@penalty.Amount.ToString("N2")</td>
+                                                <td class="@(penalty.IsPaid ? "text-success" : "text-danger")">
+                                                    @(penalty.IsPaid ? "Paid" : "Unpaid")
+                                                </td>
+                                            </tr>
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <tr>
+                                            <td colspan="3" class="text-center">No penalties found.</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+
+                            <div class="d-flex justify-content-end mt-3">
+                                <h5>
+                                    <strong>Total Due:</strong>
+                                    <span class="text-danger">₱@Model.Amount.ToString("N2")</span>
+                                </h5>
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr />
+
+                    <!-- Payment Method -->
+                    <div class="row mb-3">
+                        <div class="col-12 col-md-3">
+                            <h6 class="fw-bold">Payment Method</h6>
+                        </div>
+                        <div class="col-12 col-md-9">
+                            <input type="text" class="form-control" value="@Model.Method" readonly />
+                        </div>
+                    </div>
+
+                    <!-- Payment Amount -->
+                    <div class="row mb-3">
+                        <div class="col-12 col-md-3">
+                            <h6 class="fw-bold">Amount</h6>
+                        </div>
+                        <div class="col-12 col-md-9">
+                            <input type="text" class="form-control" value="₱@Model.Amount.ToString("N2")" readonly />
+                        </div>
+                    </div>
+
+                    <!-- OR Number Entry -->
+                    <div class="row mb-3">
+                        <div class="col-12 col-md-3">
+                            <h6 class="fw-bold">OR Number</h6>
+                        </div>
+                        <div class="col-12 col-md-9">
+                            <input type="text" name="orNumber" class="form-control" required />
+                        </div>
+                    </div>
+
+                    <hr />
+
+                    <!-- Submit Buttons -->
+                    <div class="row">
+                        <div class="col-12 col-md-3"></div>
+                        <div class="col-12 col-md-9 d-flex justify-content-start">
+                            <a asp-action="TransactionsIndex" class="btn bg-color1 me-2 px-3">Cancel</a>
+                            <button type="submit" class="btn bg-color3 fw-bold px-5">Record OR Number</button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

@@ -1,0 +1,128 @@
+﻿@model test.Models.BorrowerViewModel
+@{
+    ViewData["Title"] = "Sign Up";
+}
+
+<section>
+    <div class="px-4 py-5 px-md-5 text-center text-lg-start">
+        <div class="container">
+            <div class="row gx-lg-5 align-items-center">
+                <div class="col-lg-6 mb-5 mb-lg-0">
+                    <h1 class="my-5 display-3 fw-bold ls-tight">
+                        Your gateway to <br />
+                        <span class="text-color3">endless knowledge</span>
+                    </h1>
+                    <p style="color: hsl(217, 10%, 50.8%)">
+                        Welcome to ShelfMaster – your ultimate library management solution.
+                        Unlock the power of seamless library management with a system designed to simplify organization, improve accessibility, and inspire learning.
+                    </p>
+                </div>
+                <div class="col-lg-6 mb-5 mb-lg-0">
+                    <div class="card">
+                        <div class="card-body py-3 px-md-5">
+                            <div class="d-flex align-items-center mb-4">
+                                <img src="~/images/logo/logo1.png" width="100" alt="ShelfMaster Logo" />
+                                <div class="ms-3">
+                                    <h3 class="mb-0 fw-bold">Create an account</h3>
+                                    <small>Be one of us.</small>
+                                </div>
+                            </div>
+
+                            <!-- Toast Notification -->
+                            <div id="toast" class="toast align-items-center text-white border-0 position-fixed bottom-0 end-0" role="alert" aria-live="assertive" aria-atomic="true" style="margin: 1rem;">
+                                <div class="d-flex">
+                                    <div class="toast-body">
+                                        <i class="fs-5 me-2"></i> <span id="toastMessage"></span>
+                                    </div>
+                                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                                </div>
+                            </div>
+
+                            <form id="registerForm">
+                                <div class="form-floating mb-3">
+                                    <input asp-for="Name" type="text" class="form-control" id="name" placeholder="Name">
+                                    <label for="name">Name</label>
+                                    <span asp-validation-for="Name" class="text-danger" data-valmsg-for="Name"></span>
+                                </div>
+                                <div class="form-floating mb-3">
+                                    <input asp-for="Email" type="email" class="form-control" id="email" placeholder="Email">
+                                    <label for="email">Email</label>
+                                    <span asp-validation-for="Email" class="text-danger" data-valmsg-for="Email"></span>
+                                </div>
+                                <div class="form-floating mb-3">
+                                    <input asp-for="Password" type="password" class="form-control" id="password" placeholder="Password">
+                                    <label for="password">Password</label>
+                                    <span asp-validation-for="Password" class="text-danger" data-valmsg-for="Password"></span>
+                                </div>
+
+                                <!-- ✅ Updated Register Button -->
+                                <button type="submit" id="btn-register" class="btn action-btn btn-register mt-3 w-100" aria-label="Register a new account">
+                                    SIGN UP
+                                </button>
+
+                                <p class="mt-3">
+                                    Already a member?
+                                    <a asp-controller="Auth" asp-action="Login" class="text-color3 fw-bold text-decoration-none">Log In</a>
+                                </p>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+@section Scripts {
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            document.getElementById("registerForm").addEventListener("submit", async function (event) {
+                event.preventDefault(); // Prevent page reload
+
+                // Collect form data
+                const formData = {
+                    Name: document.getElementById("name").value,
+                    Email: document.getElementById("email").value,
+                    Password: document.getElementById("password").value
+                };
+
+                try {
+                    const response = await fetch("/api/auth/register", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify(formData)
+                    });
+
+                    const data = await response.json();
+                    const toastElement = document.getElementById("toast");
+                    const toastBody = toastElement.querySelector(".toast-body");
+
+                    toastElement.classList.remove("bg-success", "bg-danger", "text-white");
+
+                    if (response.ok) {
+                        toastBody.innerHTML = `<i class="ri-check-line me-2"></i> ${data.message || "Registration successful! Please verify your email."}`;
+                        toastElement.classList.add("bg-success", "text-white");
+                        new bootstrap.Toast(toastElement).show();
+
+                        setTimeout(() => { window.location.href = "/Auth/ResendVerification"; }, 3000);
+                    } else {
+                        if (data.errors) {
+                            Object.keys(data.errors).forEach(field => {
+                                const errorSpan = document.querySelector(`span[data-valmsg-for="${field}"]`);
+                                if (errorSpan) {
+                                    errorSpan.textContent = data.errors[field].join(", ");
+                                }
+                            });
+                        }
+                        // Error toast
+                        toastBody.innerHTML = `<i class="ri-close-line me-2"></i> ${data.message || "Registration failed. Please check the fields."}`;
+                        toastElement.classList.add("bg-danger", "text-white");
+                        new bootstrap.Toast(toastElement).show();
+                    }
+                } catch (error) {
+                    console.error("Error:", error);
+                }
+            });
+        });
+    </script>
+}

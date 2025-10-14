@@ -1,0 +1,167 @@
+﻿@model X.PagedList.IPagedList<test.Entity.Report>
+@using X.PagedList.Mvc.Core;
+@using System.Globalization
+
+@{
+    ViewData["Title"] = "Reports";
+    ViewData["Navigation Title"] = "Reports";
+}
+<div class="row mt-5 g-3">
+    <div class="col-12">
+        <div class="row g-0">
+            <div class="col-12 col-md-12 col-xl-12 mb-2 text-end align-items-center">
+                <div class="d-flex justify-content-end h-100">
+                    <a data-bs-toggle="modal" data-bs-target="#generateReport"
+                       class="btn bg-color3 text-color4 px-3 border-0 d-flex justify-content-center align-items-center"
+                       title="Generate Report"
+                       style="border-radius: 15px;">
+                        <i class="ri-add-circle-line"></i>
+                        <span class="ms-1 fw-bold d-sm-block d-none">Generate Report</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+                @await Html.PartialAsync("~/Areas/Admin/Views/Shared/Partials/_ToastNotification.cshtml")
+
+                <!-- Filters -->
+                <form method="get" action="@Url.Action("Index")" class="mb-3">
+                    <div class="row g-2 align-items-end">
+                        <div class="col-md-3">
+                            <label class="form-label">Report Type</label>
+                            <select name="typeFilter" class="form-select">
+                                <option value="">All</option>
+                                <option value="daily" selected="@(Context.Request.Query["typeFilter"] == "daily")">Daily</option>
+                                <option value="weekly" selected="@(Context.Request.Query["typeFilter"] == "weekly")">Weekly</option>
+                                <option value="monthly" selected="@(Context.Request.Query["typeFilter"] == "monthly")">Monthly</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-2">
+                            <label class="form-label">Year</label>
+                            <input type="number" name="year" value="@Context.Request.Query["year"]" class="form-control" placeholder="e.g. 2025">
+                        </div>
+
+                        <div class="col-md-2">
+                            <label class="form-label">Month</label>
+                            <input type="number" name="month" value="@Context.Request.Query["month"]" class="form-control" min="1" max="12" placeholder="1-12">
+                        </div>
+
+                        <div class="col-md-2">
+                            <label class="form-label">Day</label>
+                            <input type="number" name="day" value="@Context.Request.Query["day"]" class="form-control" min="1" max="31" placeholder="1-31">
+                        </div>
+
+                        <div class="col-md-2">
+                            <button type="submit" class="btn bg-color3 w-100">
+                                <i class="ri-filter-line"></i> Apply
+                            </button>
+                        </div>
+                    </div>
+                </form>
+
+                <!-- Reports Table -->
+                <div class="table-responsive mt-3 w-100">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Type</th>
+                                <th>Period</th>
+                                <th>File</th>
+                                <th>Generated At</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (Model.Any())
+                            {
+                                foreach (var report in Model)
+                                {
+                                    <tr>
+                                        <td>@report.Id</td>
+                                        <td class="text-capitalize">@report.Type</td>
+
+                                        <td>
+                                            @{
+                                                string periodText = "";
+
+                                                if (report.Type == "daily" && report.Month.HasValue && report.Day.HasValue)
+                                                {
+                                                    // Safe daily date
+                                                    if (DateTime.TryParse($"{report.Year}-{report.Month.Value}-{report.Day.Value}", out var dailyDate))
+                                                    {
+                                                        periodText = dailyDate.ToString("yyyy-MM-dd");
+                                                    }
+                                                    else
+                                                    {
+                                                        periodText = $"{report.Year}-{report.Month}-{report.Day}";
+                                                    }
+                                                }
+                                                else if (report.Type == "weekly" && report.Month.HasValue && report.Day.HasValue)
+                                                {
+                                                    // Safe weekly range
+                                                    if (DateTime.TryParse($"{report.Year}-{report.Month.Value}-{report.Day.Value}", out var startDate))
+                                                    {
+                                                        var endDate = startDate.AddDays(6);
+                                                        periodText = $"{startDate:MMM dd, yyyy} - {endDate:MMM dd, yyyy}";
+                                                    }
+                                                    else
+                                                    {
+                                                        periodText = $"{report.Year}-{report.Month}-{report.Day}";
+                                                    }
+                                                }
+                                                else if (report.Type == "monthly" && report.Month.HasValue)
+                                                {
+                                                    periodText = $"{CultureInfo.CurrentCulture.DateTimeFormat.GetMonthName(report.Month.Value)} {report.Year}";
+                                                }
+                                                else
+                                                {
+                                                    periodText = report.Year.ToString();
+                                                }
+
+                                                @periodText
+                                            }
+                                        </td>
+
+
+                                        <td>
+                                            <a href="@report.FilePath" download title="Download Report" class="text-decoration-none">
+                                                <i class="ri-download-2-line"></i> Download
+                                            </a>
+                                        </td>
+                                        <td>@report.GeneratedAt.ToString("MMMM dd, yyyy HH:mm")</td>
+                                    </tr>
+                                }
+                            }
+                            else
+                            {
+                                <tr>
+                                    <td colspan="5" class="text-center text-muted">No reports found.</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+
+                    <!-- Pagination -->
+                    <div class="d-flex justify-content-end mt-3">
+                        @Html.PagedListPager(Model, page => Url.Action("Index", new {
+                        page,
+                        typeFilter = Context.Request.Query["typeFilter"],
+                        year = Context.Request.Query["year"],
+                        month = Context.Request.Query["month"],
+                        day = Context.Request.Query["day"]
+                                                }),
+                                                new PagedListRenderOptions
+                                                {
+                                                    LiElementClasses = new[] { "page-item", "custom-page-item" },
+                                                    PageClasses = new[] { "page-link", "custom-page-link" }
+                                                })
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@await Html.PartialAsync("~/Areas/Admin/Views/Report/GenerateReport.cshtml")

@@ -1,0 +1,26 @@
+﻿@foreach (var transaction in Model)
+{
+    <div class="modal fade" id="returnBook-@transaction.Id" tabindex="-1" aria-labelledby="returnBook" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="returnBook">Return Book</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form asp-controller="Lending" asp-action="Return">
+                    <div class="modal-body">
+                        <input type="hidden" name="Id" value="@transaction.Id"/>
+                        <p>Are you sure you want to return this book?</p>
+                        <p><strong>Book: </strong>@transaction.BookTitle</p>
+                        <p><strong>Due Date: </strong>@transaction.DueDate.ToString("MMMM dd, yyyy")</p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="reset" class="btn bg-color1" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn bg-color3 fw-bold">Return</button>
+                    </div>
+                </form>
+
+            </div>
+        </div>
+    </div>
+}

@@ -1,0 +1,101 @@
+﻿@model X.PagedList.IPagedList<test.Entity.BookCopy>
+@using X.PagedList.Mvc.Core
+
+@{
+    ViewData["Title"] = "Archived Copies";
+    ViewData["Navigation Title"] = "Archived Copies";
+}
+
+<div class="row mt-5 g-3">
+    <div class="col-12">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+                <!-- Row with Search (left) and Button (right) -->
+                <div class="row align-items-center mb-3">
+                    <!-- Search (GET) -->
+                    <div class="col-md-6 mb-2 mb-md-0">
+                        <form method="get" asp-action="CopiesIndex">
+                            <div class="input-group">
+                                <button class="btn bg-color3" type="submit">
+                                    <i class="ri-search-line"></i>
+                                </button>
+                                <input type="text" name="search" value="@Context.Request.Query["search"]"
+                                       class="form-control" placeholder="Search by Copy No">
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Soft Delete Button (POST on table form) -->
+                    <div class="col-md-6 text-md-end">
+                        <button type="submit" form="copiesForm" class="btn btn-danger">
+                            <i class="ri-delete-bin-line me-1"></i> Soft Delete Selected
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Table -->
+                <form id="copiesForm" method="post" asp-action="SoftDeleteSelected">
+                    <div class="table-responsive w-100">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>
+                                        <input type="checkbox" id="selectAll" />
+                                    </th>
+                                    <th>Copy No</th>
+                                    <th>Book Title</th>
+                                    <th>Status</th>
+                                    <th>Archived At</th>
+                                    <th>Reason</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @if (Model.Any())
+                                {
+                                    foreach (var copy in Model)
+                                    {
+                                        <tr>
+                                            <td>
+                                                <input type="checkbox" name="selectedIds" value="@copy.Id" />
+                                            </td>
+                                            <td>@copy.CopyNumber</td>
+                                            <td>@copy.Book?.Title</td>
+                                            <td>@copy.Status</td>
+                                            <td>@copy.ArchivedAt?.ToString("yyyy-MM-dd HH:mm")</td>
+                                            <td>@copy.ArchiveReason</td>
+                                        </tr>
+                                    }
+                                }
+                                else
+                                {
+                                    <tr>
+                                        <td colspan="6" class="text-center text-muted">No archived copies found.</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </form>
+
+                <!-- Pagination -->
+                <div class="d-flex justify-content-end mt-3">
+                    @Html.PagedListPager(Model, page => Url.Action("CopiesIndex", new { page, search = Context.Request.Query["search"] }),
+                    new PagedListRenderOptions
+                    {
+                        LiElementClasses = new[] { "page-item", "custom-page-item" },
+                        PageClasses = new[] { "page-link", "custom-page-link" }
+                    })
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        //Select/Deselect all checkboxes
+        document.getElementById("selectAll")?.addEventListener("change", function () {
+            document.querySelectorAll("input[name='selectedIds']").forEach(cb => cb.checked = this.checked);
+        });
+    </script>
+}

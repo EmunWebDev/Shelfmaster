@@ -1,0 +1,262 @@
+﻿@model test.Areas.Admin.Models.AcquisitionViewModel
+
+@{
+    ViewData["Title"] = "New Acquisition Request";
+    ViewData["Navigation Title"] = "New Acquisition Request";
+}
+
+@if (!ViewData.ModelState.IsValid)
+{
+    <div class="alert alert-danger">
+        <strong>Validation Errors:</strong>
+        <ul>
+            @foreach (var entry in ViewData.ModelState)
+            {
+                foreach (var error in entry.Value.Errors)
+                {
+                    <li><strong>@entry.Key</strong>: @error.ErrorMessage</li>
+                }
+            }
+        </ul>
+    </div>
+}
+
+<div class="row mt-5 g-3">
+    <div class="col-12">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+                <form asp-action="Create" method="post" novalidate>
+                    <div asp-validation-summary="ModelOnly" class="alert alert-danger d-none"></div>
+
+                    <!-- Vendor Selection -->
+                    <div class="mb-3">
+                        <label asp-for="VendorId" class="form-label">Vendor <span class="text-danger">*</span></label>
+                        <select asp-for="VendorId" class="form-select" asp-items="Model.Vendors">
+                            <option value="0">-- Select Vendor --</option>
+                        </select>
+                        <span asp-validation-for="VendorId" class="text-danger"></span>
+                    </div>
+
+                    <!-- Book Details -->
+                    <div class="mb-3">
+                        <label asp-for="Title" class="form-label">Book Title <span class="text-danger">*</span></label>
+                        <input asp-for="Title" class="form-control" />
+                        <span asp-validation-for="Title" class="text-danger"></span>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label asp-for="ISBN" class="form-label">ISBN</label>
+                            <input asp-for="ISBN" class="form-control" />
+                            <span asp-validation-for="ISBN" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="PublicationYear" class="form-label">Publication Year</label>
+                            <input asp-for="PublicationYear" class="form-control" type="number" />
+                            <span asp-validation-for="PublicationYear" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <!-- Author Selection/Creation -->
+                    <div class="mb-3">
+                        <label class="form-label">Author <span class="text-danger">*</span></label>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label class="form-label small text-muted">Select Existing Author</label>
+                                <select asp-for="SelectedAuthorId" class="form-select" id="authorDropdown" onchange="toggleAuthorInput()">
+                                    <option value="0">-- Select Existing Author --</option>
+                                    @if (Model.Authors != null)
+                                    {
+                                        foreach (var author in Model.Authors)
+                                        {
+                                            <option value="@author.Value">@author.Text</option>
+                                        }
+                                    }
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small text-muted">Or Enter New Author</label>
+                                <input asp-for="AuthorName" class="form-control" placeholder="Enter new author name" id="authorNameInput" />
+                                <span asp-validation-for="AuthorName" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <small class="form-text text-muted">Select an existing author OR enter a new author name</small>
+                    </div>
+
+                    <!-- Publisher Selection/Creation -->
+                    <div class="mb-3">
+                        <label class="form-label">Publisher <span class="text-danger">*</span></label>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label class="form-label small text-muted">Select Existing Publisher</label>
+                                <select asp-for="SelectedPublisherId" class="form-select" id="publisherDropdown" onchange="togglePublisherInput()">
+                                    <option value="0">-- Select Existing Publisher --</option>
+                                    @if (Model.Publishers != null)
+                                    {
+                                        foreach (var publisher in Model.Publishers)
+                                        {
+                                            <option value="@publisher.Value">@publisher.Text</option>
+                                        }
+                                    }
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small text-muted">Or Enter New Publisher</label>
+                                <input asp-for="PublisherName" class="form-control" placeholder="Enter new publisher name" id="publisherNameInput" />
+                                <span asp-validation-for="PublisherName" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="row mt-2" id="publisherDetails" style="display: none;">
+                            <div class="col-md-4">
+                                <input asp-for="PublisherAddress" class="form-control" placeholder="Publisher Address" />
+                            </div>
+                            <div class="col-md-4">
+                                <input asp-for="PublisherContact" class="form-control" placeholder="Contact Number" />
+                            </div>
+                            <div class="col-md-4">
+                                <input asp-for="PublisherEmail" class="form-control" placeholder="Email Address" />
+                            </div>
+                        </div>
+                        <small class="form-text text-muted">Select an existing publisher OR enter details for a new one</small>
+                    </div>
+
+                    <!-- Genre Selection/Creation -->
+                    <div class="mb-3">
+                        <label class="form-label">Genre <span class="text-danger">*</span></label>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label class="form-label small text-muted">Select Existing Genre</label>
+                                <select asp-for="SelectedGenreId" class="form-select" id="genreDropdown" onchange="toggleGenreInput()">
+                                    <option value="0">-- Select Existing Genre --</option>
+                                    @if (Model.Genres != null)
+                                    {
+                                        foreach (var genre in Model.Genres)
+                                        {
+                                            <option value="@genre.Value">@genre.Text</option>
+                                        }
+                                    }
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small text-muted">Or Enter New Genre</label>
+                                <input asp-for="GenreName" class="form-control" placeholder="Enter new genre name" id="genreNameInput" />
+                                <span asp-validation-for="GenreName" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <small class="form-text text-muted">Select an existing genre OR enter a new genre name</small>
+                    </div>
+
+                    <!-- Quantity and Cost -->
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label asp-for="Quantity" class="form-label">Quantity <span class="text-danger">*</span></label>
+                            <input asp-for="Quantity" class="form-control" type="number" min="1" />
+                            <span asp-validation-for="Quantity" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="EstimatedCost" class="form-label">Estimated Cost</label>
+                            <input asp-for="EstimatedCost" class="form-control" type="number" step="0.01" />
+                            <span asp-validation-for="EstimatedCost" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <!-- Notes -->
+                    <div class="mb-3">
+                        <label asp-for="Notes" class="form-label">Notes</label>
+                        <textarea asp-for="Notes" class="form-control" rows="3" placeholder="Any additional notes or special instructions"></textarea>
+                        <span asp-validation-for="Notes" class="text-danger"></span>
+                    </div>
+
+                    <!-- Submit Buttons -->
+                    <div class="d-flex justify-content-end gap-2">
+                        <button type="submit" class="btn bg-color3 text-color4 px-4" style="border-radius: 15px;">Submit Request</button>
+                        <a asp-action="Index" class="btn btn-secondary px-4" style="border-radius: 15px;">Cancel</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+
+    <script>
+        // Toggle Author input based on dropdown selection
+        function toggleAuthorInput() {
+            const dropdown = document.getElementById('authorDropdown');
+            const input = document.getElementById('authorNameInput');
+
+            if (dropdown && input) {
+                if (dropdown.value === '0' || dropdown.value === '') {
+                    // Show the input when no author is selected
+                    input.style.display = 'block';
+                    input.disabled = false;
+                } else {
+                    // Hide and clear the input when an author is selected
+                    input.style.display = 'none';
+                    input.disabled = true;
+                    input.value = '';
+                }
+            }
+        }
+
+        // Toggle Publisher input based on dropdown selection
+        function togglePublisherInput() {
+            const dropdown = document.getElementById('publisherDropdown');
+            const input = document.getElementById('publisherNameInput');
+            const details = document.getElementById('publisherDetails');
+
+            if (dropdown && input && details) {
+                if (dropdown.value === '0' || dropdown.value === '') {
+                    // Show inputs when no publisher is selected
+                    input.style.display = 'block';
+                    input.disabled = false;
+                    details.style.display = 'block';
+                    // Enable all detail inputs
+                    const detailInputs = details.querySelectorAll('input');
+                    detailInputs.forEach(inp => inp.disabled = false);
+                } else {
+                    // Hide and clear inputs when a publisher is selected
+                    input.style.display = 'none';
+                    input.disabled = true;
+                    input.value = '';
+                    details.style.display = 'none';
+                    // Clear and disable all detail inputs
+                    const detailInputs = details.querySelectorAll('input');
+                    detailInputs.forEach(inp => {
+                        inp.disabled = true;
+                        inp.value = '';
+                    });
+                }
+            }
+        }
+
+        // Toggle Genre input based on dropdown selection
+        function toggleGenreInput() {
+            const dropdown = document.getElementById('genreDropdown');
+            const input = document.getElementById('genreNameInput');
+
+            if (dropdown && input) {
+                if (dropdown.value === '0' || dropdown.value === '') {
+                    // Show the input when no genre is selected
+                    input.style.display = 'block';
+                    input.disabled = false;
+                } else {
+                    // Hide and clear the input when a genre is selected
+                    input.style.display = 'none';
+                    input.disabled = true;
+                    input.value = '';
+                }
+            }
+        }
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM loaded, initializing toggles...');
+            toggleAuthorInput();
+            togglePublisherInput();
+            toggleGenreInput();
+        });
+    </script>
+}

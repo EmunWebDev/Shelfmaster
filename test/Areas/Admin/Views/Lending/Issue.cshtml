@@ -1,0 +1,423 @@
+﻿@{
+    ViewData["Title"] = "Borrow Book";
+    ViewData["Navigation Title"] = "Borrow Book";
+}
+
+<style>
+    #reader {
+        width: 100%;
+        max-width: 350px; 
+        aspect-ratio: 1 / 1; 
+        margin: 0 auto; 
+        border: 8px solid #000; 
+        border-radius: 12px; 
+        position: relative;
+        overflow: hidden;
+    }
+
+        #reader video {
+            object-fit: cover; 
+            width: 100%;
+            height: 100%;
+        }
+
+    .borrower-result {
+        cursor: pointer;
+        padding: 8px 12px;
+        border-bottom: 1px solid #eee;
+    }
+
+        .borrower-result:hover {
+            background-color: #f8f9fa;
+        }
+
+        .borrower-result:last-child {
+            border-bottom: none;
+        }
+
+    .borrower-type-badge {
+        font-size: 0.75em;
+        margin-left: 8px;
+    }
+
+    .selected-borrower {
+        background-color: #e3f2fd;
+        border: 2px solid #2196f3;
+        border-radius: 6px;
+        padding: 12px;
+        margin-top: 8px;
+    }
+
+    .borrower-details {
+        font-size: 0.9em;
+        color: #666;
+        margin-top: 4px;
+    }
+</style>
+
+<div class="row mt-5 g-3">
+    <div class="col-12">
+        <div class="card border-0 shadow-sm h-100 overflow-auto">
+            <div class="card-body">
+                <nav style="--bs-breadcrumb-divider: '>';" aria-label="breadcrumb">
+                    <ol class="breadcrumb text-color4">
+                        <li class="breadcrumb-item">
+                            <a asp-controller="Lending" asp-action="TransactionsIndex" class="text-color3 fw-bold">Transactions</a>
+                        </li>
+                        <li class="breadcrumb-item active" aria-current="page">Issue a Book</li>
+                    </ol>
+                </nav>
+
+                <hr />
+
+                <div class="row">
+                    <div class="col-12 col-sm-3 col-md-3 col-lg-2">
+                        <span class="fw-bold">Borrower</span>
+                    </div>
+                    <div class="col-12 col-sm-9 col-md-9 col-lg-10">
+                        <label for="borrowerSearch" class="form-label">Search Borrower (Student Number / Staff Number / Name)</label>
+                        <div class="position-relative">
+                            <input type="text" id="borrowerSearch" class="form-control" placeholder="Type student/staff number or name..." autocomplete="off">
+                            <div id="borrowerResults" class="position-absolute w-100 bg-white border border-top-0 d-none" style="z-index: 1000; max-height: 300px; overflow-y: auto;"></div>
+                        </div>
+                        <div id="selectedBorrower" class="mt-2"></div>
+                        <input type="hidden" id="selectedBorrowerId" value="">
+                    </div>
+                </div>
+
+                <hr class="my-4" />
+
+                <div class="row">
+                    <div class="col-12 col-sm-3 col-md-3 col-lg-2">
+                        <span class="fw-bold">Books</span>
+                    </div>
+                    <div class="col-12 col-sm-9 col-md-9 col-lg-10">
+                        <label for="bookSearch" class="form-label">Search for Books</label>
+
+                        <div class="input-group">
+                            <input type="text" id="bookSearch" class="form-control" placeholder="Start typing to search...">
+                            <button type="button" class="btn btn-outline-secondary" id="scanBtn">
+                                <i class="ri-qr-code-line"></i>
+                            </button>
+                        </div>
+
+                        <ul id="bookResults" class="list-group w-50 mt-1 d-none"></ul>
+                        <div id="selectedBooks" class="mt-2"></div>
+                    </div>
+                </div>
+
+                <hr class="my-4" />
+
+                <div class="row mb-3">
+                    <div class="col-12 col-sm-3 col-md-3 col-lg-2">
+                        <span class="fw-bold">Borrowed On</span>
+                    </div>
+                    <div class="col-12 col-sm-9 col-md-9 col-lg-10">
+                        <span id="issuedOnDate"></span>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-12 col-sm-3 col-md-3 col-lg-2">
+                        <span class="fw-bold">Due Date</span>
+                    </div>
+                    <div class="col-12 col-sm-9 col-md-9 col-lg-10">
+                        <label for="dueDate" class="form-label">Select Due Date</label>
+                        <input type="date" id="dueDate" class="form-control" disabled>
+                    </div>
+                </div>
+
+                <hr class="my-4" />
+
+                <div class="row mt-3">
+                    <div class="col-12 col-sm-3 col-md-3 col-lg-2"></div>
+                    <div class="col-12 col-sm-9 col-md-9 col-lg-10">
+                        <div class="d-flex align-items-center">
+                            <a asp-controller="Lending" asp-action="TransactionsIndex" class="btn bg-color1 me-2 px-3">Cancel</a>
+                            <button class="btn bg-color3 fw-bold px-5" id="issueBookBtn">Issue Book</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="toast align-items-center bg-success border-0 position-fixed bottom-0 end-0" style="margin: 1rem;" role="alert" aria-live="assertive" aria-atomic="true" id="toast">
+                    <div class="d-flex">
+                        <div class="toast-body text-white d-flex align-items-center"></div>
+                        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="scannerModal" tabindex="-1" aria-labelledby="scannerModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Scan QR Code</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-center d-flex justify-content-center">
+                <div id="reader"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+
+<script>
+    $(document).ready(function () {
+        let searchTimeout;
+
+        // Borrower search functionality
+        $("#borrowerSearch").on("input", function () {
+            let query = $(this).val().trim();
+            clearTimeout(searchTimeout);
+
+            if (query.length >= 2) {
+                searchTimeout = setTimeout(() => {
+                    $.ajax({
+                        url: "/Admin/Lending/SearchBorrowers",
+                        type: "GET",
+                        data: { term: query },
+                        success: function (borrowers) {
+                            let resultList = $("#borrowerResults");
+                            resultList.empty();
+
+                            if (borrowers.length > 0) {
+                                borrowers.forEach(borrower => {
+                                    let badgeClass = borrower.type === 'Student' ? 'badge-primary' : 'badge-success';
+                                    resultList.append(`
+                                        <div class="borrower-result"
+                                             data-id="${borrower.id}"
+                                             data-name="${borrower.name}"
+                                             data-studentnumber="${borrower.studentNumber}"
+                                             data-type="${borrower.type}"
+                                             data-email="${borrower.email}"
+                                             data-department="${borrower.department}"
+                                             data-details="${borrower.displayText}">
+                                            <div>
+                                                <strong>${borrower.name}</strong>
+                                                <span class="badge ${badgeClass} borrower-type-badge">${borrower.type}</span>
+                                            </div>
+                                            <div class="borrower-details">${borrower.displayText}</div>
+                                        </div>
+                                    `);
+                                });
+                                resultList.removeClass("d-none");
+                            } else {
+                                resultList.append('<div class="p-3 text-muted">No borrowers found</div>');
+                                resultList.removeClass("d-none");
+                            }
+                        },
+                        error: function() {
+                            showToast("Error searching for borrowers", false);
+                        }
+                    });
+                }, 300); // Debounce for 300ms
+            } else {
+                $("#borrowerResults").addClass("d-none");
+            }
+        });
+
+            // Handle borrower selection
+        $("#borrowerResults").on("click", ".borrower-result", function () {
+            console.log($(this).data());
+            let borrowerId = $(this).data("id");
+            let borrowerName = $(this).data("name");
+            let borrowerNumber = $(this).data("studentnumber");   
+            let borrowerType = $(this).data("type");
+            let borrowerEmail = $(this).data("email");
+            let borrowerDepartment = $(this).data("department"); 
+
+            // Set selected borrower
+            $("#selectedBorrowerId").val(borrowerId);
+            $("#borrowerSearch").val("");
+            $("#borrowerResults").addClass("d-none");
+
+            // Display selected borrower info
+            let typeClass = borrowerType === 'Student' ? 'bg-primary' : 'bg-success';
+            $("#selectedBorrower").html(`
+                <div class="selected-borrower">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <h6 class="mb-1">
+                                ${borrowerName}
+                                <span class="badge ${typeClass}">${borrowerType}</span>
+                            </h6>
+                            <div class="borrower-details">
+                                <strong>${borrowerType} Number:</strong> ${borrowerNumber}<br>
+                                <strong>Email:</strong> ${borrowerEmail}<br>
+                                <strong>Department:</strong> ${borrowerDepartment}
+                            </div>
+                        </div>
+                        <button type="button" class="btn btn-sm btn-outline-danger" onclick="clearSelectedBorrower()">
+                            <i class="ri-close-line"></i>
+                        </button>
+                    </div>
+                </div>
+            `);
+        });
+
+        // Hide borrower results when clicking outside
+        $(document).click(function (event) {
+            if (!$(event.target).closest("#borrowerSearch, #borrowerResults").length) {
+                $("#borrowerResults").addClass("d-none");
+            }
+        });
+
+        // Book search functionality (existing code)
+        $("#bookSearch").on("input", function () {
+            let query = $(this).val();
+            if (query.length > 1) {
+                $.ajax({
+                    url: "/Admin/Lending/SearchBooks",
+                    type: "GET",
+                    data: { term: query },
+                    success: function (books) {
+                        let resultList = $("#bookResults");
+                        resultList.empty();
+                        if (books.length > 0) {
+                            books.forEach(book => {
+                                resultList.append(`<li class="list-group-item list-group-item-action"
+                                    data-id="${book.id}" data-title="${book.title}">${book.title}</li>`);
+                            });
+                            resultList.removeClass("d-none");
+                        } else {
+                            resultList.addClass("d-none");
+                        }
+                    }
+                });
+            } else {
+                $("#bookResults").addClass("d-none");
+            }
+        });
+
+        $("#bookResults").on("click", "li", function () {
+            let bookId = $(this).data("id");
+            let bookTitle = $(this).data("title");
+            addBookToSelection(bookId, bookTitle);
+            $("#bookSearch").val("");
+            $("#bookResults").addClass("d-none");
+        });
+
+        $("#selectedBooks").on("click", ".remove-book", function () {
+            $(this).parent().remove();
+        });
+
+        $(document).click(function (event) {
+            if (!$(event.target).closest("#bookSearch, #bookResults").length) {
+                $("#bookResults").addClass("d-none");
+            }
+        });
+
+        document.getElementById("issuedOnDate").textContent =
+            new Date().toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" });
+
+        let dueDateInput = document.getElementById("dueDate");
+        let currentDate = new Date();
+        currentDate.setDate(currentDate.getDate() + 2);
+        dueDateInput.value = currentDate.toISOString().split("T")[0];
+
+        $("#issueBookBtn").on("click", function () {
+            let borrowerId = $("#selectedBorrowerId").val();
+            let dueDate = $("#dueDate").val();
+            let bookIds = [];
+            $("#selectedBooks span").each(function () {
+                bookIds.push($(this).data("id"));
+            });
+
+            if (!borrowerId || bookIds.length === 0 || !dueDate) {
+                showToast("Please select a borrower, books, and a due date.", false);
+                return;
+            }
+
+            $.ajax({
+                url: "@Url.Action("IssueBook")",
+                type: "POST",
+                contentType: "application/json",
+                data: JSON.stringify({ BorrowerId: borrowerId, BookIds: bookIds, DueDate: dueDate }),
+                success: function (response) {
+                    showToast(response.message, true);
+                    $("#selectedBooks").empty();
+                    $("#dueDate").val('');
+                    clearSelectedBorrower();
+                },
+                error: function (xhr) {
+                    let msg = xhr.responseJSON?.message || "Error issuing books.";
+                    showToast(msg, false);
+                }
+            });
+        });
+
+        // QR Scanner functionality (existing code)
+        let html5QrCode;
+        $("#scanBtn").click(function () {
+            $("#scannerModal").modal("show");
+            setTimeout(() => {
+                if (!html5QrCode) {
+                    html5QrCode = new Html5Qrcode("reader");
+                }
+                const qrBoxSize = Math.min(250, $("#reader").width() * 0.8)
+                html5QrCode.start(
+                    { facingMode: "environment" },
+                    { fps: 10, qrbox: qrBoxSize },
+                    (decodedText) => {
+                        html5QrCode.stop();
+                        $("#scannerModal").modal("hide");
+                        handleScannedCode(decodedText);
+                    }
+                );
+            }, 300);
+        });
+
+        $("#scannerModal").on("hidden.bs.modal", function () {
+            if (html5QrCode) {
+                html5QrCode.stop();
+            }
+        });
+
+        function showToast(message, success) {
+            var toastEl = document.getElementById('toast');
+            var toastBody = toastEl.querySelector('.toast-body');
+            toastBody.textContent = message;
+            toastEl.classList.remove("bg-success", "bg-danger");
+            toastEl.classList.add(success ? "bg-success" : "bg-danger");
+            new bootstrap.Toast(toastEl).show();
+        }
+
+        function addBookToSelection(id, title) {
+            if (!$(`#selectedBooks span[data-id='${id}']`).length) {
+                $("#selectedBooks").append(`
+                    <span class="badge bg-color3 text-color4 m-1 p-2" data-id="${id}">
+                        ${title}
+                        <i class="ri-close-line ms-1 remove-book" style="cursor:pointer;"></i>
+                    </span>
+                `);
+            }
+        }
+
+        function handleScannedCode(code) {
+            $.ajax({
+                url: "/Admin/Lending/GetBookByCode",
+                type: "GET",
+                data: { code: code },
+                success: function (book) {
+                    addBookToSelection(book.id, book.title);
+                },
+                error: function () {
+                    showToast("Book not found or unavailable.", false);
+                }
+            });
+        }
+    });
+
+    // Clear selected borrower function
+    function clearSelectedBorrower() {
+        $("#selectedBorrowerId").val("");
+        $("#selectedBorrower").empty();
+        $("#borrowerSearch").focus();
+    }
+</script>

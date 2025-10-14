@@ -1,0 +1,57 @@
+﻿@foreach (var borrower in Model)
+{
+    <div class="modal fade" id="editBorrowerInfo-@borrower.Id" tabindex="-1" aria-labelledby="editBorrowerInfo" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editBorrowerInfo">Edit Borrower's Information</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+
+                <form method="post" action="@Url.Action("Update", "Borrower", new { id = borrower.Id })">
+                    <div class="modal-body">
+                        <input type="hidden" name="BorrowerID" value="@borrower.Id" />
+
+                        <div class="row">
+                            <div class="col">
+                                <label>Name</label>
+                                <input type="text" class="form-control" name="Name" aria-label="Name" value="@borrower.Name" required>
+                            </div>
+                            <div class="col">
+                                <label>Birth Date</label>
+                                <input type="date" class="form-control" name="BirthDate" max="2025-01-31" value="@borrower.BirthDate?.ToDateTime(TimeOnly.MinValue).ToString("yyyy-MM-dd")"
+                                       aria-label="Birth Date">
+                            </div>
+                        </div>
+                        <div class="row mt-3">
+                            <div class="col">
+                                <label>Contact Number</label>
+                                <input type="tel" name="ContactNum" class="form-control" value="@borrower.ContactNum"  pattern="[0-9]{4}[- ]?[0-9]{3}[- ]?[0-9]{4}" title="Enter a valid phone number (e.g., 0912-345-6789 or 09123456789)">
+                            </div>
+                           <div class="col">
+                                <label>Gender</label>
+                                <select name="Gender" id="genderDropdown" class="form-select">
+                                    <option value="Male" selected="@(borrower.Gender == "Male" ? "selected" : null)">Male</option>
+                                    <option value="Female" selected="@(borrower.Gender == "Female" ? "selected" : null)">Female</option>
+                                    <option value="Other" selected="@(borrower.Gender == "Other" ? "selected" : null)">Other</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="row mt-3">
+                            <div class="col">
+                                <label>Email</label>
+                                <input type="email" name="Email" value="@borrower.Email" class="form-control" title="Enter a valid email address (e.g., name@example.com)" aria-label="Email" required>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="button" class="btn bg-color1" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn bg-color3 fw-bold">Save Changes</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+}

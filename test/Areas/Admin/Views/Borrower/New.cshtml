@@ -1,0 +1,89 @@
+﻿@model test.Areas.Admin.Models.BorrowerViewModel
+
+@{
+    ViewData["Title"] = "Add New Borrower";
+    ViewData["Navigation Title"] = "Add New Borrower";
+}
+
+<div class="row mt-5 g-3">
+   
+    <div class="col-12">
+        <div class="card border-0 shadow-sm h-100 overflow-auto">
+            <form asp-controller="Borrower" asp-action="CreateAccount" method="post" >
+                <div class="card-body">
+                    <div class="row">
+                        <nav style="--bs-breadcrumb-divider: '>';" aria-label="breadcrumb">
+                            <ol class="breadcrumb text-color4">
+                                <li class="breadcrumb-item"><a asp-controller="Borrower" asp-action="Index" class="text-color3 fw-bold">Borrower</a></li>
+                                <li class="breadcrumb-item active" aria-current="page">Add New Borrower</li>
+                            </ol>
+                        </nav>
+
+                        <hr />
+                        <!--Borrower Personal Info-->
+                        <div class="col-12 col-sm-3 col-md-3 col-lg-2">
+                            <span class="fw-bold">Borrower</span>
+                        </div>
+                        <div class="col-12 col-sm-9 col-md-9 col-lg-10">
+                            <div class="row">
+                                <div class="col">
+                                    <label>Name</label>
+                                    <input asp-for="Name" type="text" class="form-control" aria-label="Name" required>
+                                    <span asp-validation-for="Name" class="text-danger"></span>
+                                </div>
+                                <div class="col">
+                                    <label>Birth Date</label>
+                                    <input asp-for="BirthDate" type="date" class="form-control" max="2025-01-31" aria-label="Birth Date">
+                                    <span asp-validation-for="BirthDate" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="row mt-3">
+                                <div class="col">
+                                    <label>Contact Number</label>
+                                    <input asp-for="ContactNum" type="tel" class="form-control" pattern="[0-9]{4}[- ]?[0-9]{3}[- ]?[0-9]{4}" title="Enter a valid phone number (e.g., 0912-345-6789 or 09123456789)">
+                                    <span asp-validation-for="ContactNum" class="text-danger"></span>
+
+                                </div>
+                                <div class="col">
+                                    <label>Gender</label>
+                                    <select asp-for="Gender" id="genderDropdown" class="form-select">
+                                        <option value="" selected disabled>Select Gender</option>
+                                        <option value="Male">Male</option>
+                                        <option value="Female">Female</option>
+                                        <option value="Other">Other</option>
+                                    </select>
+                                    <span asp-validation-for="Gender" class="text-danger"></span>
+                                </div>
+                            </div>
+
+                            <div class="row mt-3">
+                                <div class="col">
+                                    <label>Email</label>
+                                    <input asp-for="Email" type="email" class="form-control" title="Enter a valid email address (e.g., name@example.com)" aria-label="Email" required>
+                                    <span asp-validation-for="Email" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>       
+
+                    <div class="row mt-3">
+                        <div class="col-12 col-sm-3 col-md-3 col-lg-2">
+                        </div>
+                        <div class="col-12 col-sm-9 col-md-9 col-lg-10">
+                            <div class="d-flex align-items-center justify-content-start">
+                                <a asp-action="Index" class="btn bg-color1 me-2 px-3">Cancel</a>
+                                <button type="submit" class="btn bg-color3 fw-bold px-5">Register</button>
+
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </form>
+
+        </div>
+    </div>
+</div>
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

@@ -1,0 +1,88 @@
+﻿@model X.PagedList.IPagedList<test.Entity.Book>
+@using X.PagedList.Mvc.Core;
+@{
+    ViewData["Title"] = "Archive";
+    ViewData["Navigation Title"] = "Archive";
+}
+<div class="row mt-5 g-3">
+    <div class="col-12">
+        <div class="row g-0">
+            <div class="col-12 col-md-12 col-xl-12 mb-2 text-end align-items-center">
+                <div class="d-flex justify-content-end h-100">
+                    <a data-bs-toggle="modal" data-bs-target="#emptyArchive"
+                       class="btn bg-color3 text-color4 px-3 border-0 d-flex justify-content-center align-items-center"
+                       title="Empty Archive"
+                       style="border-radius: 15px;">
+                        <i class="ri-delete-bin-2-line"></i>                       
+                        <span class="ms-1 fw-bold d-sm-block d-none">Empty Archive</span>
+                    </a>
+
+                </div>
+            </div>
+        </div>
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+                @await Html.PartialAsync("~/Views/Shared/Partials/_ToastNotification.cshtml")
+
+                <div class="table-responsive mt-3 w-100">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Title</th>
+                                <th>ISBN</th>
+                                <th>Author</th>
+                                <th>Genre</th>
+                                <th>Publisher</th>
+                                <th>Year Published</th>
+                                <th><i class="ri-settings-line"></i></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (Model.Any())
+                            {
+                                @foreach (var unavailableBook in Model)
+                                {
+                                    <tr>
+                                        <td>@unavailableBook.Id</td>
+                                        <td>@unavailableBook.Title</td>
+                                        <td>@unavailableBook.ISBN</td>
+                                        <td>@(unavailableBook.Author?.Name ?? "Unknown Author")</td>
+                                        <td>@(unavailableBook.Genre?.Name ?? "Unknown Genre")</td>
+                                        <td>@(unavailableBook.Publisher?.Name ?? "Unknown Publisher")</td>
+                                        <td>@unavailableBook.PublicationYear</td>
+                                        <td>
+                                            <div class="dropdown">
+                                                <button class="btn bg-white p-0 border-0" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                                    <i class="ri-more-2-fill"></i>
+                                                </button>
+                                                <ul class="dropdown-menu" style="cursor:pointer;">
+                                                    <li>
+                                                        <a data-bs-toggle="modal" data-bs-target="#restoreBook-@unavailableBook.Id" class="dropdown-item">
+                                                            Restore
+                                                        </a>
+                                                    </li>
+                                                </ul>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                            else
+                            {
+                                <tr>
+                                    <td colspan="10" class="text-center text-muted">Nothing in archive.</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                  
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@await Html.PartialAsync("~/Areas/Admin/Views/Archive/Empty.cshtml")
+@await Html.PartialAsync("~/Areas/Admin/Views/Archive/Delete.cshtml")
+@await Html.PartialAsync("~/Areas/Admin/Views/Archive/Restore.cshtml")
+

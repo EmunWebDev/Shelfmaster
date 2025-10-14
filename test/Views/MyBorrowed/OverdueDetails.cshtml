@@ -1,0 +1,104 @@
+﻿@model test.Models.OverdueViewModel
+@{
+    ViewData["Title"] = "Overdue Books";
+}
+
+<div class="container mt-3">
+    <div class="row gx-5">
+        <div class="col-12 col-md-6 col-lg-4">
+            @await Html.PartialAsync("~/Views/Shared/Partials/_Sidebar.cshtml")
+
+        </div>
+
+        <div class="col-12 col-md-6 col-lg-8">
+            <div class="p-3 bg-white rounded-3">
+                <nav style="--bs-breadcrumb-divider: '>';" aria-label="breadcrumb">
+                    <ol class="breadcrumb text-color4">
+                        <li class="breadcrumb-item">
+                            <a asp-controller="MyBorrowed" asp-action="OverdueDetails" class="text-color3 fw-bold">Overdue Books</a>
+                        </li>
+                        <li class="breadcrumb-item active" aria-current="page">Details</li>
+                    </ol>
+                </nav>
+
+                <h3 class="text-color4">@Model.BookTitle</h3>
+                <p>by <strong>@Model.Author</strong></p>
+
+                <div class="row">
+                    <div class="col">
+                        <h6>Borrowed On: </h6>
+                    </div>
+                    <div class="col">
+                        @Model.Transaction.TransactionDate.ToString("MMMM dd, yyyy")
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col">
+                        <h6>Due On: </h6>
+                    </div>
+                    <div class="col">
+                        @Model.Transaction.DueDate.ToString("MMMM dd, yyyy")
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col">
+                        <h6>Returned On: </h6>
+                    </div>
+                    <div class="col">
+                        @(Model.Transaction.ReturnDate.HasValue ? Model.Transaction.ReturnDate.Value.ToString("MMMM dd, yyyy") : "Not returned")
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col">
+                        <h6>Status:</h6>
+                    </div>
+                    <div class="col">
+                        <span class="badge
+                            @(Model.Transaction.Status == "Active" ? "bg-info" :
+                              Model.Transaction.Status == "Overdue" ? "bg-warning" :
+                              Model.Transaction.Status == "Lost" ? "bg-secondary" :
+                              Model.Transaction.Status == "Damaged" ? "bg-danger" :
+                              Model.Transaction.Status == "Completed" ? "bg-success" : "bg-light")">
+                            @Model.Transaction.Status
+                        </span>
+                    </div>
+                </div>
+                @if (Model.Transaction.Penalty != null && Model.Transaction.Penalty.Any())
+                {
+                    <div class="row mt-3">
+                        <div class="col">
+                            <h6>Penalties:</h6>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col">
+                            <ul class="list-group">
+                                @foreach (var penalty in Model.Transaction.Penalty)
+                                {
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                        @penalty.Reason
+                                        <span class="badge bg-danger">@penalty.Amount</span>
+                                        <span class="badge @(penalty.IsPaid == true ? "bg-success" : "bg-danger")">
+                                            @(penalty.IsPaid == true ? "Paid" : "Not Paid")
+                                        </span>
+                                    </li>
+                                }
+                            </ul>
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    <div class="row mt-3">
+                        <div class="col">
+                            <p class="text-muted">No penalties.</p>
+                        </div>
+                    </div>
+                }
+
+            </div>
+
+        </div>
+    </div>
+</div>

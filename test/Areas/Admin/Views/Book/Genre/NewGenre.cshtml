@@ -1,0 +1,23 @@
+﻿<div class="modal fade" id="newGenre" tabindex="-1" aria-labelledby="newGenre" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="newGenre">Add New Genre</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+
+            <form asp-area="Admin" asp-controller="Book" asp-action="CreateGenre" method="post">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="genreName" class="form-label">Name</label>
+                        <input id="genreName" type="text" class="form-control" name="Name" placeholder="Enter genre" required />
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn bg-color1" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn bg-color3 fw-bold">Add Genre</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
