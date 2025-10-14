@@ -1,0 +1,53 @@
+﻿@using Microsoft.AspNetCore.Mvc.Rendering
+
+@if (TempData["message"] != null)
+{
+    var messageType = TempData["messageType"]?.ToString();
+
+    string iconClass = "";
+    string fontColor = "text-white";
+    string toastClass = "bg-white";
+    string iconBgClass = "bg-success";
+    string messageText = TempData["message"].ToString();
+
+    if (messageType == "success")
+    {
+        iconClass = "ri-check-line";
+        fontColor = "text-white";
+        toastClass = "bg-success";
+        iconBgClass = "bg-success";
+    }
+    else if (messageType == "error")
+    {
+        iconClass = "ri-close-line";
+        fontColor = "text-white";
+        toastClass = "bg-danger";
+        iconBgClass = "bg-danger";
+    }
+    else if (messageType == "warning")
+    {
+        iconClass = "ri-alert-line";
+        fontColor = "text-white";
+        toastClass = "bg-warning";
+        iconBgClass = "bg-warning";
+    }
+    else if (messageType == "info")
+    {
+        iconClass = "ri-information-line";
+        fontColor = "text-dark";
+        toastClass = "bg-color3";
+        iconBgClass = "bg-color3";
+    }
+
+    <div class="toast align-items-center @toastClass border-0 position-fixed bottom-0 end-0"
+         role="alert" aria-live="assertive" aria-atomic="true" id="toast" style="margin: 1rem;">
+        <div class="d-flex">
+            <div class="toast-body @fontColor d-flex align-items-center">
+                <i class="@iconClass fs-5 me-2 @iconBgClass text-white rounded-3"></i>
+                @messageText
+            </div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+    </div>
+}
+

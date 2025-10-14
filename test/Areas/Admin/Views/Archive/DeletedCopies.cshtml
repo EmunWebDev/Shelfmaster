@@ -1,0 +1,78 @@
+﻿@model X.PagedList.IPagedList<test.Entity.BookCopy>
+@using X.PagedList.Mvc.Core
+
+@{
+    ViewData["Title"] = "Deleted Copies";
+    ViewData["Navigation Title"] = "Deleted Copies";
+}
+
+<div class="row mt-5 g-3">
+    <div class="col-12">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+
+                <!--Updated Search Design -->
+                <form method="get" asp-action="DeletedCopies" class="mb-3">
+                    <div class="input-group">
+                        <button class="btn bg-color3" type="submit" id="search">
+                            <i class="ri-search-line"></i>
+                        </button>
+                        <input type="text" name="search" value="@Context.Request.Query["search"]"
+                               class="form-control" placeholder="Search by Copy No." aria-describedby="search">
+                    </div>
+                </form>
+
+                <!--Table -->
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Copy No</th>
+                            <th>Book Title</th>
+                            <th>Status Before Delete</th>
+                            <th>Deleted At</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model.Any())
+                        {
+                            foreach (var copy in Model)
+                            {
+                                <tr>
+                                    <td>@copy.CopyNumber</td>
+                                    <td>@copy.Book.Title</td>
+                                    <td>@copy.Status</td>
+                                    <td>@copy.UpdatedAt.ToString("yyyy-MM-dd HH:mm")</td>
+                                    <td>
+                                        <form asp-action="RestoreDeletedCopy" method="post" style="display:inline;">
+                                            <input type="hidden" name="id" value="@copy.Id" />
+                                            <button type="submit" class="btn btn-sm btn-success">
+                                                <i class="ri-refresh-line me-1"></i> Restore
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="5" class="text-center text-muted">No deleted copies found.</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+
+                <!-- Pagination -->
+                <div class="d-flex justify-content-end mt-3">
+                    @Html.PagedListPager(Model, page => Url.Action("DeletedCopies", new { page, search = Context.Request.Query["search"] }),
+                    new PagedListRenderOptions
+                    {
+                        LiElementClasses = new[] { "page-item", "custom-page-item" },
+                        PageClasses = new[] { "page-link", "custom-page-link" }
+                    })
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,64 @@
+﻿@foreach (var copy in Model.Copies)
+{ 
+    <div class="modal fade" id="editStatusModal-@copy.Id" tabindex="-1" aria-labelledby="editStatusModal" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editStatusModal">Edit Book Copy Status</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+
+                <form method="post" action="@Url.Action("UpdateBookCopyStatus", "Book", new { id = copy.Id })">
+                    <div class="modal-body">
+                        <input type="hidden" name="Id" value="@copy.Id" />
+
+                        <div class="mb-3">
+                            <label class="form-label">Select Status</label>
+                            <select name="status" id="statusDropdown-@copy.Id" class="form-select" required>
+                                <option value="Available" selected="@(copy.Status == "Available" ? "selected" : null)">Available</option>
+                                <option value="Borrowed" selected="@(copy.Status == "Borrowed" ? "selected" : null)">Borrowed</option>
+                                <option value="Damaged" selected="@(copy.Status == "Damaged" ? "selected" : null)">Damaged</option>
+                                <option value="Lost" selected="@(copy.Status == "Lost" ? "selected" : null)">Lost</option>
+                                <option value="Overdue" selected="@(copy.Status == "Overdue" ? "selected" : null)">Overdue</option>
+                                <option value="Unavailable" selected="@(copy.Status == "Unavailable" ? "selected" : null)">Unavailable</option>
+                                <option value="Other" selected="@(copy.Status != "Available" && copy.Status != "Borrowed" &&
+                                          copy.Status != "Damaged" && copy.Status != "Lost" && copy.Status != "Unavailable" &&
+                                          copy.Status != "Overdue" ? "selected" : null)">
+                                    Other
+                                </option>
+                            </select>
+                        </div>
+
+
+                        <div class="mb-3" id="otherStatusInput" style="display: none;">
+                            <label class="form-label">Specify Status</label>
+                            <input type="text" name="OtherStatus" class="form-control" placeholder="Enter the status details" />
+                        </div>
+
+                    </div>
+
+                
+                    <div class="modal-footer">
+                        <button type="button" class="btn bg-color1" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn bg-color3 fw-bold">Save Changes</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <script>
+            $('#statusDropdown').on('change', function () {
+                var status = $(this).val();
+
+                if (status === 'Other') {
+                    $('#otherStatusInput').show();
+                } else {
+                    $('#otherStatusInput').hide();
+                }
+            });
+
+
+
+        </script>
+</div>
+}

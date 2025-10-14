@@ -1,0 +1,117 @@
+﻿@model test.Areas.Admin.Models.TransactionViewModel
+
+@{
+    ViewData["Title"] = "Details";
+    ViewData["Navigation Title"] = "Details";
+}
+
+<div class="row mt-5 g-3">
+    <div class="col-12">
+        <div class="card border-0 shadow-sm h-100 overflow-auto">
+            <div class="card-body">
+                <nav style="--bs-breadcrumb-divider: '>';" aria-label="breadcrumb">
+                    <ol class="breadcrumb text-color4">
+                        <li class="breadcrumb-item"><a asp-controller="Lending" asp-action="TransactionsIndex" class="text-color3 fw-bold">Transactions</a></li>
+                        <li class="breadcrumb-item active" aria-current="page">Details</li>
+                    </ol>
+                </nav>
+
+                <hr />
+
+                <!-- Borrower Details -->
+                <div class="row mb-3">
+                        <div class="col-12 col-md-3">
+                        <h6 class="fw-bold">Borrower Details</h6>
+                    </div>
+                    <div class="col-12 col-md-9">
+                        <div class="row">
+                            <div class="col">
+                                <label class="form-label fw-semibold">Name</label>
+                                    <h5>@Model.BorrowerName</h5>
+                                </div>
+                        </div>
+                    </div>
+                </div>
+
+                <hr />
+
+                <!-- Penalty Summary -->
+                <div class="row mb-3">
+                    <div class="col-12 col-md-3">
+                        <h6 class="fw-bold">Penalty Summary</h6>
+                    </div>
+                    <div class="col-12 col-md-9">
+                        <table class="table table-bordered">
+                            <thead>
+                                <tr>
+                                    <th>Reason</th>
+                                    <th>Amount</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @if (Model.Penalties != null && Model.Penalties.Any())
+                                {
+                                    @foreach (var penalty in Model.Penalties)
+                                    {
+                                        <tr>
+                                            <td>@penalty.Reason</td>
+                                            <td>₱@penalty.Amount.ToString("N2")</td>
+                                            <td class="@(penalty.IsPaid ? "text-success" : "text-danger")">
+                                                @(penalty.IsPaid ? "Paid" : "Unpaid")
+                                            </td>
+                                        </tr>
+                                    }
+                                    <tr>
+                                        <td class="text-end">Total:</td>
+                                        <td colspan="2">
+                                            <span class="text-danger">₱@Model.Penalties.Sum(p => p.Amount).ToString("N2")</span>
+                                            @if (Model.PaymentStatus == "Fully Paid")
+                                            {
+                                                <span class="badge bg-success">@Model.PaymentStatus</span>
+                                            }
+                                        </td>
+                                    </tr>
+                                }
+                                else
+                                {
+                                    <tr>
+                                        <td colspan="3" class="text-center">No penalties found.</td>
+                                    </tr>
+                                }
+                            </tbody>
+
+
+                        </table>
+
+                    </div>
+                </div>
+
+                <hr />
+
+                <!-- Book Borrowed Summary -->
+                <div class="row mb-3">
+                    <div class="col-12 col-md-3">
+                        <h6 class="fw-bold">Book Borrowed</h6>
+                    </div>
+                    <div class="col-12 col-md-9">
+                        <div class="row">
+                            <div class="col">
+                                <label class="form-label fw-semibold">Title</label>
+                                <h5>@Model.BookTitle</h5>
+                            </div>
+                            <div class="col">
+                                <label class="form-label fw-semibold">Copy No.</label>
+                                <h5>@Model.CopyNumber</h5>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

@@ -1,0 +1,52 @@
+﻿@model X.PagedList.IPagedList<test.Areas.Admin.Models.BorrowerViewModel>
+@{
+    ViewData["Title"] = "Archived Borrowers";
+    ViewData["Navigation Title"] = "Archived Borrowers";
+}
+
+<div class="card border-0 shadow-sm h-100">
+    <div class="card-body">
+        <h5 class="mb-3">Archived Borrowers</h5>
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Archived At</th>
+                        <th><i class="ri-settings-line"></i></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model.Any())
+                    {
+                        @foreach (var borrower in Model)
+                        {
+                            <tr>
+                                <td>@borrower.Id</td>
+                                <td>@borrower.Name</td>
+                                <td>@borrower.Email</td>
+                                <td>@borrower.UpdatedAt.ToString("f")</td>
+                                <td>
+                                    <form asp-controller="Borrower" asp-action="Restore" method="post">
+                                        <input type="hidden" name="id" value="@borrower.Id" />
+                                        <button type="submit" class="btn btn-sm btn-success">
+                                            <i class="ri-refresh-line"></i> Restore
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="5" class="text-center text-muted">No archived borrowers.</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

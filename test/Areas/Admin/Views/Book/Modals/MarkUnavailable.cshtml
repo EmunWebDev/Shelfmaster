@@ -1,0 +1,25 @@
+﻿@foreach (var book in Model)
+{
+    <div class="modal fade" id="markUnavailable-@book.Id" tabindex="-1" aria-labelledby="markUnavailable" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="markUnavailable">Move to Archive</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+
+                <form asp-controller="Book" asp-action="MarkUnavailable" method="post">
+                    <div class="modal-body">
+                        <input type="hidden" name="Id" value="@book.Id" />
+                        <p>Are you sure you want to move this book to Archive? You can restore it later if needed.</p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn bg-color1" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-danger">Move to Archive</button>
+                    </div>
+                </form>
+
+            </div>
+        </div>
+    </div>
+}

@@ -1,0 +1,35 @@
+﻿@foreach(var unavailableBook in Model)
+{
+    <div class="modal fade" id="deleteBook-@unavailableBook.Id" tabindex="-1" aria-labelledby="deleteBook" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="deleteBook">Delete Book Permanently</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+
+                <form asp-controller="Book" asp-action="Delete" method="post">
+                    <div class="modal-body">
+                        <input type="hidden" name="Id" value="@unavailableBook.Id" />
+
+                        <p>
+                            You are about to <span class="text-danger fw-bold">permanently delete</span> the book:
+                            <strong>@unavailableBook.Title</strong> by <strong>@unavailableBook.Author.Name</strong>.
+                        </p>
+
+                        <p>
+                            This action <span class="text-danger fw-bold">cannot be undone</span>. All associated data, including book copies, lending history, and penalties related to this book, may also be removed.
+                        </p>
+
+                        <p class="fw-bold">Are you sure you want to proceed with deletion?</p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn bg-color1" data-bs-dismiss="modal">Cancel</button>
+                        <button type="button" class="btn btn-danger" id="deleteButton">Yes, delete book</button>
+                    </div>
+                </form>
+
+            </div>
+        </div>
+    </div>
+}

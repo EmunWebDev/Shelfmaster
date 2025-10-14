@@ -1,0 +1,119 @@
+﻿@model X.PagedList.IPagedList<test.Entity.Book>
+@using X.PagedList.Mvc.Core;
+@{
+    ViewData["Title"] = "Books";
+    ViewData["Navigation Title"] = "Books";
+}
+<div class="row mt-5 g-3">
+    <div class="col-12">
+        <div class="row g-0">
+            <div class="col-12 col-md-12 col-xl-12 mb-2 text-end align-items-center">
+                <div class="d-flex justify-content-end h-100">
+                    @* <a asp-controller="Book" asp-action="New"
+                        class="btn bg-color3 text-color4 px-3 border-0 d-flex justify-content-center align-items-center"
+                        title="Add new book"
+                         style="border-radius: 15px;">
+                        <i class="ri-add-circle-line"></i>
+                        <span class="ms-1 fw-bold d-sm-block d-none">New</span>
+                    </a> *@
+
+                </div>
+            </div>
+        </div>
+        <div class="card border-0 shadow-sm h-100">       
+            <div class="card-body">
+                @await Html.PartialAsync("~/Views/Shared/Partials/_ToastNotification.cshtml")
+                <div class="row align-items-center">
+                    <div class="col-md-4 mb-3 mb-md-0">
+                        <form asp-controller="Book" asp-action="Index" method="get" class="d-flex">
+                            <div class="input-group">
+                                <button class="btn bg-color3" id="search" type="submit">
+                                    <i class="ri-search-line"></i>
+                                </button>
+                                <input type="text" name="searchQuery" value="@Context.Request.Query["searchQuery"]"
+                                       class="form-control" placeholder="Search by Book ISBN" aria-describedby="search">
+                            </div>
+                        </form>
+                    </div>   
+                </div>
+                <div class="table-responsive mt-3 w-100">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Title</th>
+                                <th>ISBN</th>
+                                <th>Author</th>
+                                <th>Genre</th>
+                                <th>Publisher</th>
+                                <th>Year Published</th>
+                                <th><i class="ri-settings-line"></i></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (Model.Any())
+                            {
+                                @foreach (var book in Model)
+                                {
+                                    <tr>
+                                        <td>@book.Id</td>
+                                        <td>@book.Title</td>
+                                        <td>@book.ISBN</td>
+                                        <td>@(book.Author?.Name ?? "Unknown Author")</td>
+                                        <td>@(book.Genre?.Name ?? "Unknown Genre")</td>
+                                        <td>@(book.Publisher?.Name ?? "Unknown Publisher")</td>
+                                        <td>@book.PublicationYear</td>
+
+                                        <td>
+                                            <div class="dropdown">
+                                                <button class="btn bg-white p-0 border-0" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                                    <i class="ri-more-2-fill"></i>
+                                                </button>
+                                                <ul class="dropdown-menu" style="cursor:pointer;">
+                                                    <li>
+                                                        <a asp-controller="Book" asp-action="Edit" asp-route-id="@book.Id" class="dropdown-item">
+                                                            Edit Details
+                                                        </a>
+                                                    </li>
+
+                                                    <li>
+                                                        <a asp-controller="Book" asp-action="ManageCopies" asp-route-id="@book.Id" class="dropdown-item">
+                                                            Manage Copies
+                                                        </a>
+                                                    </li>
+
+                                                    <li>
+                                                        <a class="dropdown-item" data-bs-toggle="modal" data-bs-target="#markUnavailable-@book.Id">
+                                                            Move to Archive
+                                                        </a>
+                                                    </li>
+                                                </ul>
+                                            </div>
+                                        </td>
+
+                                    </tr>
+                                }
+                            }
+                            else
+                            {
+                                <tr>
+                                    <td colspan="10" class="text-center text-muted">No books found.</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                    <div class="d-flex justify-content-end mt-3">
+                        @Html.PagedListPager(Model, page => Url.Action("Index", new { page, searchQuery = Context.Request.Query["searchQuery"] }),
+                                 new PagedListRenderOptions
+                        {
+                            LiElementClasses = new[] { "page-item", "custom-page-item" },
+                            PageClasses = new[] { "page-link", "custom-page-link" }
+                        })
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@await Html.PartialAsync("~/Areas/Admin/Views/Book/Modals/MarkUnavailable.cshtml")
+@await Html.PartialAsync("~/Areas/Admin/Views/Book/Modals/Delete.cshtml")

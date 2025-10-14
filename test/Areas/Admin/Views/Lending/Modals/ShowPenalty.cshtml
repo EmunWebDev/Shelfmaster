@@ -1,0 +1,51 @@
+﻿@foreach (var transaction in Model)
+{
+    <div class="modal fade" id="showPenalty-@transaction.Id" tabindex="-1" aria-labelledby="showPenalty" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="showPenalty">Penalty Fees Overview</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" name="TransactionID" value="@transaction.Id" />
+
+                    <strong>Borrower: <span>@transaction.BorrowerName</span></strong>
+                    @if (transaction.Penalties != null)
+                    {
+                        <table class="table table-bordered">
+                            <thead>
+                                <tr>
+                                    <th>Reason</th>
+                                    <th>Amount</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var penalty in transaction.Penalties)
+                                {
+                                    <tr>
+                                        <td>@penalty.Reason</td>
+                                        <td>₱@penalty.Amount.ToString("N2")</td>
+                                        <td>@(penalty.IsPaid ? "Paid" : "Unpaid")</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                        <div class="d-flex align-items-center justify-content-end">
+                            <h5>Total: ₱@transaction.Total.ToString("N2")</h5>
+                        </div>
+                    }
+                    else
+                    {
+                        <p>No penalties associated with this transaction.</p>
+                    }
+                </div>
+                <div class="modal-footer">
+                    <button type="reset" class="btn bg-color1" data-bs-dismiss="modal">Cancel</button>
+                    <a asp-controller="Lending" asp-action="PayFees" asp-area="Admin" asp-route-transactionId="@transaction.Id" class="btn bg-color3 fw-bold">Confirm Payment</a>
+                </div>
+            </div>
+        </div>
+    </div>
+}

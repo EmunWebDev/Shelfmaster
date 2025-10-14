@@ -1,0 +1,30 @@
+﻿@model TwoFactorSetupViewModel
+
+@{
+    ViewData["Title"] = "Enable Two-Factor Authentication";
+}
+
+<h2>@ViewData["Title"]</h2>
+
+<p>Scan the QR code below with your authenticator app (e.g., Google Authenticator, Authy):</p>
+
+@if (!string.IsNullOrEmpty(Model.QrCodeUrl))
+{
+    <img src="@Model.QrCodeUrl" alt="QR Code for 2FA setup" />
+}
+
+<p>Or enter this manual key: <strong>@Model.ManualKey</strong></p>
+
+<form method="post" asp-action="EnableTwoFactorAuth">
+    <div class="form-group">
+        <label asp-for="OtpCode"></label>
+        <input asp-for="OtpCode" class="form-control" autocomplete="off" />
+        <span asp-validation-for="OtpCode" class="text-danger"></span>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Verify & Enable</button>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
