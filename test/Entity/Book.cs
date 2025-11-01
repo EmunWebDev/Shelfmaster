@@ -51,6 +51,7 @@ namespace test.Entity
 
         public ICollection<Acquisition> Acquisitions { get; set; } = new List<Acquisition>();
 
+        public bool IsObsolete { get; set; } = false;
 
     }
 }

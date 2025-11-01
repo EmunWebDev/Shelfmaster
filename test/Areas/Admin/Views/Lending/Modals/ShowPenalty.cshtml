@@ -26,14 +26,14 @@
                                 {
                                     <tr>
                                         <td>@penalty.Reason</td>
-                                        <td>₱@penalty.Amount.ToString("N2")</td>
+                                        <td>@($"PHP {penalty.Amount:N2}")</td>
                                         <td>@(penalty.IsPaid ? "Paid" : "Unpaid")</td>
                                     </tr>
                                 }
                             </tbody>
                         </table>
                         <div class="d-flex align-items-center justify-content-end">
-                            <h5>Total: ₱@transaction.Total.ToString("N2")</h5>
+                            <h5 class="fw-bold mb-0">Total: @($"PHP {transaction.Total:N2}")</h5>
                         </div>
                     }
                     else

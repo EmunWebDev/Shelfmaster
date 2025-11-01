@@ -30,6 +30,12 @@ namespace test.Areas.Admin.Controllers
         [HttpPost]
         public IActionResult Login(string Username, string Password)
         {
+            if (string.IsNullOrWhiteSpace(Password) || Password.Length < 12)
+            {
+                ViewBag.Error = "Password must be at least 12 characters long.";
+                return View();
+            }
+
             var user = _context.Users.FirstOrDefault(u => u.Username == Username && (u.Role == "Admin" || u.Role == "Librarian"));
 
             if (user == null)

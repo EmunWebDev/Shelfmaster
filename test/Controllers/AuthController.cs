@@ -35,12 +35,16 @@ namespace test.Controllers
         [HttpPost]
         public async Task<IActionResult> Login(string Email, string Password, bool RememberMe)
         {
-            if (string.IsNullOrEmpty(Email) || string.IsNullOrEmpty(Password))
-            {
-                ModelState.AddModelError("Email", "Email and password are required.");
-                return View();
+            if (string.IsNullOrEmpty(Email) || string.IsNullOrEmpty(Password)) 
+                { ModelState.AddModelError("Email", "Email and password are required."); 
+                return View(); 
             }
 
+            if (Password.Length < 12)
+            {
+                ModelState.AddModelError("Password", "Password must be at least 12 characters long.");
+                return View();
+            }
             var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == Email);
 
             if (user == null)
@@ -284,6 +288,18 @@ namespace test.Controllers
             if (!ModelState.IsValid)
             {
                 return BadRequest(new { message = "Validation failed", errors = ModelState.ToDictionary() });
+            }
+
+            if (string.IsNullOrWhiteSpace(model.Password))
+            {
+                ModelState.AddModelError("Password", "Password is required.");
+                return BadRequest(new { message = "Password is required", errors = ModelState.ToDictionary() });
+            }
+
+            if (model.Password.Length > 12)
+            {
+                ModelState.AddModelError("Password", "Password must be up to 12 characters long.");
+                return BadRequest(new { message = "Password must be up to 12 characters long", errors = ModelState.ToDictionary() });
             }
 
             var userExists = await _context.Users.AnyAsync(u => u.Email == model.Email);

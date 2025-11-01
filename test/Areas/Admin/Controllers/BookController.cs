@@ -885,5 +885,91 @@ namespace test.Areas.Admin.Controllers
             }
         }
 
+        [HttpGet]
+        public IActionResult ObsoleteBooks(string searchQuery, int? page)
+        {
+            int pageSize = 10;
+            int pageNumber = page ?? 1;
+            int currentYear = DateTime.Now.Year;
+
+            // 1️⃣ Find all books older than 5 years
+            var oldBooks = _context.Books
+                .Include(b => b.Author)
+                .Include(b => b.Genre)
+                .Include(b => b.Publisher)
+                .Where(b => (currentYear - b.PublicationYear) >= 5)
+                .ToList();
+
+            // 2️⃣ Auto-flag them as obsolete (if not already)
+            foreach (var book in oldBooks)
+            {
+                if (!book.IsObsolete)
+                {
+                    book.IsObsolete = true;
+                }
+            }
+            _context.SaveChanges();
+
+            // 3️⃣ Filter: Show only books that are obsolete and NOT archived
+            var obsoleteBooks = _context.Books
+                .Include(b => b.Author)
+                .Include(b => b.Genre)
+                .Include(b => b.Publisher)
+                .Where(b => b.IsObsolete && !_context.BookCopies.Any(bc => bc.BookID == b.Id && bc.Status == "Archived"));
+
+            // 4️⃣ Search filter
+            if (!string.IsNullOrEmpty(searchQuery))
+            {
+                obsoleteBooks = obsoleteBooks.Where(b =>
+                    b.Title.Contains(searchQuery) ||
+                    b.ISBN.Contains(searchQuery) ||
+                    b.Author.Name.Contains(searchQuery) ||
+                    b.Genre.Name.Contains(searchQuery) ||
+                    b.Publisher.Name.Contains(searchQuery));
+            }
+
+            // 5️⃣ Pagination
+            var pagedList = obsoleteBooks.ToPagedList(pageNumber, pageSize);
+
+            return View("~/Areas/Admin/Views/Book/Obsolete/Index.cshtml", pagedList);
+        }
+
+
+        [HttpPost]
+        public async Task<IActionResult> ArchiveObsolete(int id)
+        {
+            var book = await _context.Books.FindAsync(id);
+            if (book == null)
+            {
+                TempData["message"] = "Book not found.";
+                TempData["messageType"] = "error";
+                return RedirectToAction("ObsoleteBooks");
+            }
+
+            try
+            {
+                var copies = _context.BookCopies.Where(bc => bc.BookID == book.Id).ToList();
+                foreach (var copy in copies)
+                {
+                    copy.Status = "Archived";
+                    copy.UpdatedAt = DateTime.Now;
+                }
+                await _context.SaveChangesAsync();
+
+                _logService.LogAction(UserId, "Archive Obsolete Book", $"{Username} archived obsolete book #{book.Id}.");
+
+                TempData["message"] = "Book successfully archived from obsolete list.";
+                TempData["messageType"] = "success";
+                return RedirectToAction("ObsoleteBooks");
+            }
+            catch (Exception ex)
+            {
+                TempData["message"] = "Error: " + ex.Message;
+                TempData["messageType"] = "error";
+                return RedirectToAction("ObsoleteBooks");
+            }
+        }
+
+
     }
 }

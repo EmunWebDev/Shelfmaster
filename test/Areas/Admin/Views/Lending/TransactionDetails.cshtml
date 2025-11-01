@@ -56,19 +56,31 @@
                                     {
                                         <tr>
                                             <td>@penalty.Reason</td>
-                                            <td>₱@penalty.Amount.ToString("N2")</td>
+                                            <td>@($"PHP {penalty.Amount:N2}")</td>
                                             <td class="@(penalty.IsPaid ? "text-success" : "text-danger")">
                                                 @(penalty.IsPaid ? "Paid" : "Unpaid")
                                             </td>
                                         </tr>
                                     }
+
                                     <tr>
-                                        <td class="text-end">Total:</td>
+                                        <td class="text-end fw-bold">Total:</td>
                                         <td colspan="2">
-                                            <span class="text-danger">₱@Model.Penalties.Sum(p => p.Amount).ToString("N2")</span>
+                                            <span class="text-danger fw-semibold">
+                                                @($"PHP {Model.Penalties.Sum(p => p.Amount):N2}")
+                                            </span>
+
                                             @if (Model.PaymentStatus == "Fully Paid")
                                             {
-                                                <span class="badge bg-success">@Model.PaymentStatus</span>
+                                                <span class="badge bg-success ms-2">@Model.PaymentStatus</span>
+                                            }
+                                            else if (Model.PaymentStatus == "Partially Paid")
+                                            {
+                                                <span class="badge bg-warning text-dark ms-2">@Model.PaymentStatus</span>
+                                            }
+                                            else if (Model.PaymentStatus == "Unpaid")
+                                            {
+                                                <span class="badge bg-danger ms-2">@Model.PaymentStatus</span>
                                             }
                                         </td>
                                     </tr>
@@ -76,14 +88,11 @@
                                 else
                                 {
                                     <tr>
-                                        <td colspan="3" class="text-center">No penalties found.</td>
+                                        <td colspan="3" class="text-center text-muted">No penalties found.</td>
                                     </tr>
                                 }
                             </tbody>
-
-
                         </table>
-
                     </div>
                 </div>
 

@@ -16,7 +16,8 @@
                 @if (Model.SuggestedAmount.HasValue)
                 {
                     <div class="alert alert-info">
-                        Suggested market price: <strong>₱@Model.SuggestedAmount.Value.ToString("N2")</strong>
+                        Suggested market price:
+                        <strong>@($"PHP {Model.SuggestedAmount.Value:N2}")</strong>
                     </div>
                 }
 
@@ -46,7 +47,9 @@
 
                     <div class="d-flex justify-content-end gap-2">
                         <a asp-action="TransactionsIndex" asp-area="Admin" class="btn btn-secondary">Cancel</a>
-                        <button type="submit" class="btn btn-primary">Save Penalty & Mark @Model.Reason</button>
+                        <button type="submit" class="btn btn-primary">
+                            Save Penalty & Mark @Model.Reason
+                        </button>
                     </div>
                 </form>
             </div>
@@ -69,13 +72,13 @@
                 .then(response => response.json())
                 .then(data => {
                     const resultDiv = document.getElementById("priceResult");
+                    resultDiv.classList.remove("d-none");
+
                     if (data.success) {
-                        resultDiv.classList.remove("d-none");
-                        resultDiv.innerHTML = `Suggested Price: <strong>₱${data.price.toFixed(2)}</strong>`;
-                        // auto-fill penalty input
+                        resultDiv.innerHTML = `Suggested Price: <strong>PHP ${data.price.toFixed(2)}</strong>`;
+                        // Auto-fill penalty input
                         document.getElementById("Amount").value = data.price.toFixed(2);
                     } else {
-                        resultDiv.classList.remove("d-none");
                         resultDiv.innerHTML = `<span class="text-danger">${data.message}</span>`;
                     }
                 })

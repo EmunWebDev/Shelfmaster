@@ -30,7 +30,7 @@
                                     <td>@item.TransactionID</td>
                                     <td>@item.BorrowerName</td> 
                                     <td>@item.Reason</td>
-                                    <td>₱@item.Amount.ToString("N2")</td>
+                                    <td>@($"PHP {item.Amount:N2}")</td>
                                     <td>
                                         @if (item.Method == "Unpaid")
                                         {

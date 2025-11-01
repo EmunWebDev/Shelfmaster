@@ -49,7 +49,7 @@
                         </div>
                         <div class="col-12 col-md-9">
                             <table class="table table-bordered">
-                                <thead>
+                                <thead class="table-light">
                                     <tr>
                                         <th>Reason</th>
                                         <th>Amount</th>
@@ -63,7 +63,7 @@
                                         {
                                             <tr>
                                                 <td>@penalty.Reason</td>
-                                                <td>₱@penalty.Amount.ToString("N2")</td>
+                                                <td>@($"PHP {penalty.Amount:N2}")</td>
                                                 <td class="@(penalty.IsPaid ? "text-success" : "text-danger")">
                                                     @(penalty.IsPaid ? "Paid" : "Unpaid")
                                                 </td>
@@ -73,7 +73,7 @@
                                     else
                                     {
                                         <tr>
-                                            <td colspan="3" class="text-center">No penalties found.</td>
+                                            <td colspan="3" class="text-center text-muted">No penalties found.</td>
                                         </tr>
                                     }
                                 </tbody>
@@ -82,7 +82,7 @@
                             <div class="d-flex justify-content-end mt-3">
                                 <h5>
                                     <strong>Total Due:</strong>
-                                    <span class="text-danger">₱@Model.Amount.ToString("N2")</span>
+                                    <span class="text-danger">@($"PHP {Model.Amount:N2}")</span>
                                 </h5>
                             </div>
                         </div>
@@ -106,7 +106,7 @@
                             <h6 class="fw-bold">Amount</h6>
                         </div>
                         <div class="col-12 col-md-9">
-                            <input type="text" class="form-control" value="₱@Model.Amount.ToString("N2")" readonly />
+                            <input type="text" class="form-control" value="@($"PHP {Model.Amount:N2}")" readonly />
                         </div>
                     </div>
 
@@ -116,7 +116,7 @@
                             <h6 class="fw-bold">OR Number</h6>
                         </div>
                         <div class="col-12 col-md-9">
-                            <input type="text" name="orNumber" class="form-control" required />
+                            <input type="text" name="orNumber" class="form-control" required placeholder="Enter OR number" />
                         </div>
                     </div>
 
@@ -127,7 +127,9 @@
                         <div class="col-12 col-md-3"></div>
                         <div class="col-12 col-md-9 d-flex justify-content-start">
                             <a asp-action="TransactionsIndex" class="btn bg-color1 me-2 px-3">Cancel</a>
-                            <button type="submit" class="btn bg-color3 fw-bold px-5">Record OR Number</button>
+                            <button type="submit" class="btn bg-color3 fw-bold px-5">
+                                Record OR Number
+                            </button>
                         </div>
                     </div>
                 </div>

@@ -290,34 +290,70 @@ namespace test.Areas.Admin.Controllers
             try
             {
                 var transaction = await _context.Transactions
+                    .Include(t => t.User)
                     .Include(t => t.BookCopy)
+                    .Include(t => t.Penalty)
                     .FirstOrDefaultAsync(t => t.Id == id);
 
                 if (transaction == null)
-                {
                     return NotFound();
-                }
 
                 if (transaction.ReturnDate.HasValue)
-                {
                     return BadRequest(new { message = "The book has already been returned." });
+
+                // ✅ Compute if overdue
+                var daysOverdue = (DateTime.Now - transaction.DueDate).Days;
+                daysOverdue = daysOverdue > 0 ? daysOverdue : 0;
+
+                // ✅ If overdue, apply a penalty
+                if (daysOverdue > 0)
+                {
+                    decimal finePerDay = 20m;
+                    decimal totalFine = daysOverdue * finePerDay;
+
+                    var existingPenalty = transaction.Penalty
+                        .FirstOrDefault(p => p.Reason == "Overdue");
+
+                    if (existingPenalty == null)
+                    {
+                        _context.Penalties.Add(new Penalty
+                        {
+                            TransactionID = transaction.Id,
+                            Reason = "Overdue",
+                            Amount = totalFine,
+                            IsPaid = false,
+                            CreatedAt = DateTime.Now
+                        });
+                    }
+                    else
+                    {
+                        existingPenalty.Amount = totalFine;
+                        existingPenalty.IsPaid = false;
+                    }
+
+                    TempData["message"] = $"Book returned late ({daysOverdue} day{(daysOverdue == 1 ? "" : "s")} overdue). A fine of PHP {totalFine:N2} has been added.";
+                    TempData["messageType"] = "warning";
+                }
+                else
+                {
+                    TempData["message"] = "Book successfully returned!";
+                    TempData["messageType"] = "success";
                 }
 
+                // ✅ Mark book returned
                 transaction.ReturnDate = DateTime.Now;
                 transaction.Status = "Completed";
                 transaction.BookCopy.Status = "Available";
 
-
                 await _context.SaveChangesAsync();
-                TempData["Message"] = "Transaction Complete: book successfully returned!";
 
+                // ✅ Log
                 _logService.LogAction(
                     UserId,
                     "Book Return",
                     $"{Username} returned '{transaction?.BookCopy?.Book?.Title}' (Copy #{transaction?.BookCopy.CopyNumber})."
                 );
 
-                TempData["messageType"] = "success";
                 return RedirectToAction("TransactionsIndex");
             }
             catch (Exception ex)
@@ -327,6 +363,7 @@ namespace test.Areas.Admin.Controllers
                 return RedirectToAction("TransactionsIndex");
             }
         }
+
 
         [HttpPost]
         public async Task<IActionResult> Renew(int id)
@@ -482,10 +519,10 @@ namespace test.Areas.Admin.Controllers
                 _logService.LogAction(
                     UserId,
                     "Book Marked as Lost",
-                    $"{Username} marked '{transaction?.BookCopy?.Book?.Title}' (Copy #{transaction?.BookCopy.CopyNumber}) as lost for {borrowerName}. Penalty ₱{lostPenaltyAmount.Value:F2} applied."
+                    $"{Username} marked '{transaction?.BookCopy?.Book?.Title}' (Copy #{transaction?.BookCopy.CopyNumber}) as lost for {borrowerName}. Penalty PHP {lostPenaltyAmount.Value:F2} applied."
                 );
 
-                TempData["message"] = $"Book marked as lost. Penalty fee ₱{lostPenaltyAmount.Value:F2} applied.";
+                TempData["message"] = $"Book marked as lost. Penalty fee PHP {lostPenaltyAmount.Value:F2} applied.";
                 TempData["messageType"] = "warning";
                 return RedirectToAction("TransactionsIndex");
             }
@@ -540,10 +577,10 @@ namespace test.Areas.Admin.Controllers
             _logService.LogAction(
                 UserId,
                 "Manual Lost Penalty",
-                $"{Username} manually set lost penalty for '{transaction?.BookCopy?.Book?.Title}' (Copy #{transaction?.BookCopy.CopyNumber}) to ₱{model.Amount:F2}."
+                $"{Username} manually set lost penalty for '{transaction?.BookCopy?.Book?.Title}' (Copy #{transaction?.BookCopy.CopyNumber}) to PHP {model.Amount:F2}."
             );
 
-            TempData["message"] = $"Penalty of ₱{model.Amount:F2} set and book marked as lost.";
+            TempData["message"] = $"Penalty of PHP {model.Amount:F2} set and book marked as lost.";
             TempData["messageType"] = "warning";
 
             return RedirectToAction("TransactionsIndex");
@@ -603,7 +640,7 @@ namespace test.Areas.Admin.Controllers
                 _logService.LogAction(
                     UserId,
                     "Book Marked as Damaged",
-                    $"{Username} marked '{transaction?.BookCopy?.Book?.Title}' (Copy #{transaction?.BookCopy.CopyNumber}) as damaged for {borrowerName}. A penalty of ₱{damagedPenalty:F2} has been applied."
+                    $"{Username} marked '{transaction?.BookCopy?.Book?.Title}' (Copy #{transaction?.BookCopy.CopyNumber}) as damaged for {borrowerName}. A penalty of PHP {damagedPenalty:F2} has been applied."
                 );
 
                 TempData["message"] = "The book has been marked as damaged. A penalty fee has been applied.";
@@ -757,7 +794,7 @@ namespace test.Areas.Admin.Controllers
                     .FirstOrDefaultAsync();
 
                 string penaltyMessage = penalty != null
-                    ? $"<p><strong>Penalty:</strong> ₱{penalty.Amount:F2} - {penalty.Reason}</p>"
+                    ? $"<p><strong>Penalty:</strong> PHP {penalty.Amount:F2} - {penalty.Reason}</p>"
                     : "<p><strong>Penalty:</strong> No penalties recorded yet.</p>";
 
                 // Build email
@@ -799,40 +836,88 @@ namespace test.Areas.Admin.Controllers
 
 
         [HttpPost]
-        public IActionResult ReturnAndPayFine(int id, int TransactionID)
+        public IActionResult ReturnAndPayFine(int id, int TransactionID, string orNumber)
         {
             try
             {
-                var overdueRecord = _context.Overdues.FirstOrDefault(o => o.Id == id);
+                // 1️ Get overdue and transaction details
+                var overdueRecord = _context.Overdues
+                    .Include(o => o.Transaction)
+                        .ThenInclude(t => t.BookCopy)
+                        .ThenInclude(bc => bc.Book)
+                    .FirstOrDefault(o => o.Id == id);
+
                 var transaction = _context.Transactions
-                    .Include(t => t.User)       //Users table
+                    .Include(t => t.User)
                     .Include(t => t.BookCopy)
+                        .ThenInclude(bc => bc.Book)
                     .Include(t => t.Penalty)
                     .FirstOrDefault(t => t.Id == TransactionID);
 
                 if (transaction == null)
                 {
-                    return NotFound();
+                    TempData["message"] = "Transaction not found.";
+                    TempData["messageType"] = "error";
+                    return RedirectToAction("OverdueIndex");
                 }
 
-                transaction.ReturnDate = DateTime.Now;
+                // 2️ Compute overdue fine dynamically (if needed)
+                var daysOverdue = (DateTime.Now - transaction.DueDate).Days;
+                daysOverdue = daysOverdue > 0 ? daysOverdue : 0;
+
+                decimal finePerDay = 5m; // You can make this configurable later
+                decimal totalFine = daysOverdue * finePerDay;
+
+                // 3️ Check if there’s already an overdue penalty
+                var penalty = transaction.Penalty.FirstOrDefault(p => p.Reason == "Overdue");
+                if (penalty == null)
+                {
+                    penalty = new Penalty
+                    {
+                        TransactionID = transaction.Id,
+                        Reason = "Overdue",
+                        Amount = totalFine,
+                        IsPaid = false,
+                        CreatedAt = DateTime.Now
+                    };
+                    _context.Penalties.Add(penalty);
+                }
+                else
+                {
+                    // Update penalty amount if not paid yet
+                    if (!penalty.IsPaid)
+                    {
+                        penalty.Amount = totalFine;
+                    }
+                }
+
+                // 4️ Mark penalty as paid
+                penalty.IsPaid = true;
+
+                // 5️ Create payment record (same logic as ProcessPayment)
+                var payment = new Payment
+                {
+                    TransactionID = transaction.Id,
+                    BorrowerID = transaction.BorrowerID,
+                    Amount = penalty.Amount,
+                    Method = "Cashier",
+                    ORNumber = orNumber ?? $"AUTO-{DateTime.Now:yyyyMMddHHmmss}",
+                    PaymentDate = DateTime.Now
+                };
+                _context.Payments.Add(payment);
+
+                // 6️ Complete the transaction and mark the book as available
                 transaction.Status = "Completed";
+                transaction.ReturnDate = DateTime.Now;
 
                 if (transaction.BookCopy != null)
                 {
                     transaction.BookCopy.Status = "Available";
                 }
 
-                // Mark overdue penalty as paid
-                var penalty = transaction.Penalty.FirstOrDefault(p => p.Reason == "Overdue");
-                if (penalty != null)
-                {
-                    penalty.IsPaid = true;
-                }
-
                 _context.SaveChanges();
 
-                // Enrich borrower info
+                // 7️ Enrich borrower name
                 var student = _context.Students.FirstOrDefault(s => s.Email == transaction.User.Email);
                 var staff = _context.Staffs.FirstOrDefault(st => st.Email == transaction.User.Email);
 
@@ -842,13 +927,15 @@ namespace test.Areas.Admin.Controllers
                         ? $"{staff.FirstName} {staff.LastName}"
                         : transaction.User.Name;
 
+                // 8️ Log activity
                 _logService.LogAction(
                     UserId,
-                    "Book Return",
-                    $"{Username} marked '{transaction?.BookCopy?.Book?.Title}' (Copy #{transaction?.BookCopy.CopyNumber}) as returned and fine paid by {borrowerName}."
+                    "Return & Pay Fine",
+                    $"{Username} processed overdue fine (PHP {penalty.Amount:N2}) and returned '{transaction?.BookCopy?.Book?.Title}' (Copy #{transaction?.BookCopy.CopyNumber}) for {borrowerName}. OR#: {payment.ORNumber}."
                 );
 
-                TempData["message"] = "Transaction complete: the book has been returned and the fine has been marked as paid.";
+                // 9️ Success message
+                TempData["message"] = $"Book returned successfully! Overdue fine PHP {penalty.Amount:N2} recorded (OR#: {payment.ORNumber}).";
                 TempData["messageType"] = "success";
                 return RedirectToAction("OverdueIndex");
             }
@@ -856,9 +943,10 @@ namespace test.Areas.Admin.Controllers
             {
                 TempData["message"] = "An error occurred: " + ex.Message;
                 TempData["messageType"] = "error";
-                return RedirectToAction("TransactionsIndex");
+                return RedirectToAction("OverdueIndex");
             }
         }
+
 
 
         [HttpGet]
@@ -968,7 +1056,7 @@ namespace test.Areas.Admin.Controllers
                 _logService.LogAction(
                     UserId,
                     "Payment Recorded",
-                    $"{Username} recorded payment for Transaction #{transaction.Id} ({borrowerName}) with OR No. {orNumber} (₱{totalAmount:N2})."
+                    $"{Username} recorded payment for Transaction #{transaction.Id} ({borrowerName}) with OR No. {orNumber} (PHP {totalAmount:N2})."
                 );
 
                 TempData["message"] = $"Payment recorded successfully (OR No. {orNumber}).";

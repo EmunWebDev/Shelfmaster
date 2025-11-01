@@ -82,7 +82,7 @@ namespace test.Areas.Admin.Controllers
                     ? $"admin{sanitizedUsername}123"
                     : $"{sanitizedUsername}123";
 
-                string rawPassword = sanitizedUsername + "123";
+                string rawPassword = sanitizedUsername + "123123123";
                 string hashedPassword = _passwordHasher.HashPassword(null, rawPassword);
 
                 var user = new User

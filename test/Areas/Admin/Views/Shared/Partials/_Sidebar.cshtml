@@ -58,6 +58,14 @@
                             Genres
                         </a>
                     </li>
+                    <li class="sidebar-item">
+                        <a asp-controller="Book" asp-action="ObsoleteBooks"
+                           class="sidebar-link @(test.Helpers.HtmlHelper.ActiveClass(ViewContext, "Book", "ObsoleteBooks"))">
+                            Obsolete Books
+                        </a>
+                    </li>
+
+
                 </ul>
             </li>
 
